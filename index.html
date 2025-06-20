@@ -10,38 +10,30 @@
       font-family: 'Segoe UI', Roboto, sans-serif;
       background: #fff;
       color: #000;
-      padding: 0;
-    }
-
-    .header {
-      background: #f2f2f2;
-      padding: 12px 16px;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 500;
-      color: #333;
-      word-break: break-word;
     }
 
     .container {
       max-width: 430px;
       margin: 0 auto;
-      padding: 20px 16px;
+      padding: 32px 20px 60px;
+      text-align: center;
     }
 
     .label {
       font-weight: 600;
-      font-size: 15px;
-      margin: 24px 0 8px;
+      font-size: 16px;
+      margin: 30px 0 10px;
+      text-align: left;
     }
 
     .input-wrapper {
       position: relative;
+      margin-bottom: 28px;
     }
 
     .input-wrapper input {
       width: 100%;
-      padding: 16px 75px 16px 16px;
+      padding: 18px 75px 18px 16px;
       font-size: 17px;
       border: 1px solid #e1e1e1;
       border-radius: 14px;
@@ -81,17 +73,20 @@
     }
 
     .amount-usd {
-      margin-top: 6px;
-      font-size: 13px;
+      font-size: 14px;
       color: #666;
+      margin-top: -20px;
+      margin-bottom: 32px;
+      padding-left: 2px;
+      text-align: left;
     }
 
     .button {
-      margin-top: 80px;
+      margin-top: 100px;
       width: 100%;
       background: #0052ff;
       border: none;
-      padding: 16px;
+      padding: 18px;
       font-size: 17px;
       color: white;
       border-radius: 14px;
@@ -117,16 +112,12 @@
 </head>
 <body>
 
-  <!-- TOP WALLET ADDRESS -->
-  <div class="header">
-    0x03be64fa20f23ad9114fdb014f0a526e97ceb3aa
-  </div>
-
   <div class="container">
+
     <!-- Address Input -->
     <div class="label">Address or Domain Name</div>
     <div class="input-wrapper">
-      <input type="text" value="0x79069192614f7ceE4F..." readonly />
+      <input type="text" id="walletAddress" value="0x03be64fa20f23ad9114fdb014f0a526e97ceb4aa" />
       <button class="clear-btn" onclick="clearText()">×</button>
       <button class="max-btn" onclick="pasteAddress()">Paste</button>
     </div>
@@ -144,17 +135,18 @@
 
     <!-- Submit Button -->
     <button class="button" id="nextBtn">Next</button>
+
   </div>
 
   <script>
-    function pasteAddress() {
-      navigator.clipboard.readText().then(text => {
-        document.querySelector('input[type="text"]').value = text;
-      });
+    function clearText() {
+      document.getElementById("walletAddress").value = "";
     }
 
-    function clearText() {
-      document.querySelector('input[type="text"]').value = "";
+    function pasteAddress() {
+      navigator.clipboard.readText().then(text => {
+        document.getElementById("walletAddress").value = text;
+      });
     }
 
     function setMax() {
@@ -178,5 +170,6 @@
       btn.classList.add("fade-in");
     });
   </script>
+
 </body>
 </html>
