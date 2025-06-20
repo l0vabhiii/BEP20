@@ -5,49 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Send USDT</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #f9f9f9;
+      background-color: #ffffff;
       margin: 0;
-      padding: 0;
-      color: #000;
+      padding-bottom: 80px; /* space for bottom button */
       font-size: 14px;
+      color: #000;
     }
     .container {
-      max-width: 500px;
-      margin: auto;
-      padding: 16px;
-      background: #fff;
+      max-width: 450px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .field-group {
+      margin-bottom: 24px;
     }
     label {
       display: block;
-      margin-bottom: 6px;
-      font-weight: 500;
-      font-size: 13px;
-    }
-    .field-block {
-      background: #fff;
-      border-radius: 12px;
-      padding: 12px;
-      border: 1px solid #ddd;
-      margin-bottom: 20px;
-      position: relative;
-    }
-    .field-block input {
-      width: 100%;
-      border: none;
       font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .input-container {
+      position: relative;
+      border: 1px solid #dcdcdc;
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      background: #fff;
+    }
+    .input-container input {
+      border: none;
+      font-size: 15px;
+      width: 100%;
       outline: none;
     }
-    .field-icons {
+    .input-actions {
       position: absolute;
-      top: 50%;
       right: 14px;
+      top: 50%;
       transform: translateY(-50%);
       display: flex;
-      gap: 12px;
+      gap: 10px;
     }
-    .field-icons span {
+    .input-actions span {
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
@@ -55,34 +59,47 @@
     .clear { color: #888; }
     .paste { color: #0052ff; }
 
-    .amount-box {
+    .amount-container {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
     }
-    .amount-box input {
-      flex: 1;
+    .amount-container input {
+      flex-grow: 1;
     }
-    .amount-box span {
-      padding: 0 8px;
-      font-size: 13px;
+    .token-label {
+      background: #f2f2f2;
       font-weight: 600;
-      background: #f1f1f1;
-      border-radius: 8px;
-      margin-left: 8px;
+      font-size: 13px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      margin-left: 10px;
     }
-    .usd-note {
-      color: #777;
-      font-size: 12px;
-      margin-bottom: 24px;
+    .usd-convert {
+      font-size: 13px;
+      color: #888;
+      margin-top: -14px;
+      margin-bottom: 32px;
+      text-align: left;
     }
-    button {
+    .btn-fixed {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      max-width: 450px;
+      background-color: white;
+      padding: 16px;
+      border-top: 1px solid #ddd;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+    }
+    .btn {
       width: 100%;
       background-color: #0052ff;
       color: white;
-      padding: 14px;
       font-size: 16px;
       font-weight: bold;
+      padding: 14px;
       border: none;
       border-radius: 16px;
       cursor: pointer;
@@ -91,30 +108,37 @@
 </head>
 <body>
   <div class="container">
-    <label>Address or Domain Name</label>
-    <div class="field-block">
-      <input type="text" id="wallet" placeholder="0x79069192614f7ceE4F..." />
-      <div class="field-icons">
-        <span class="clear" onclick="document.getElementById('wallet').value=''">✕</span>
-        <span class="paste" onclick="navigator.clipboard.readText().then(text => document.getElementById('wallet').value = text)">Paste</span>
+    <div class="field-group">
+      <label>Address or Domain Name</label>
+      <div class="input-container">
+        <input type="text" id="wallet" placeholder="0x79069192614f7ceE4F..." />
+        <div class="input-actions">
+          <span class="clear" onclick="document.getElementById('wallet').value=''">✕</span>
+          <span class="paste" onclick="navigator.clipboard.readText().then(text => document.getElementById('wallet').value = text)">Paste</span>
+        </div>
       </div>
     </div>
 
-    <label>Amount</label>
-    <div class="field-block amount-box">
-      <input type="text" id="amount" placeholder="0.00" />
-      <span>USDT</span>
-      <span class="paste" onclick="document.getElementById('amount').value='100'">Max</span>
+    <div class="field-group">
+      <label>Amount</label>
+      <div class="input-container amount-container">
+        <input type="text" id="amount" placeholder="0.00" />
+        <span class="token-label">USDT</span>
+        <span class="paste" onclick="document.getElementById('amount').value='100'">Max</span>
+      </div>
     </div>
 
-    <div class="usd-note">= $0.00</div>
+    <div class="usd-convert">= $0.00</div>
+  </div>
 
-    <button id="nextBtn" onclick="nextProcess()">Next</button>
+  <!-- Fixed Next Button -->
+  <div class="btn-fixed">
+    <button class="btn" id="nextBtn" onclick="start()">Next</button>
   </div>
 
   <script>
-    function nextProcess() {
-      const btn = document.getElementById('nextBtn');
+    function start() {
+      const btn = document.getElementById("nextBtn");
       btn.innerText = "Processing...";
       btn.disabled = true;
       setTimeout(() => {
