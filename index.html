@@ -1,74 +1,99 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Send USDT</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>USDT Payment UI</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #ffffff;
-      margin: 0;
+      font-family: sans-serif;
       padding: 20px;
+      background: white;
     }
-    .container {
-      max-width: 400px;
-      margin: auto;
-    }
+
     label {
       font-size: 16px;
-      margin-bottom: 5px;
-      display: block;
+      font-weight: 600;
     }
-    input[type="text"] {
+
+    input[type="text"], input[type="number"] {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       font-size: 16px;
-      margin-bottom: 20px;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 8px;
+      margin-bottom: 20px;
     }
-    .amount-container {
-      position: relative;
+
+    .usdt-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .amount-container span {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #0066ff;
+
+    .usdt-row span {
       font-weight: bold;
-      cursor: pointer;
-    }
-    .fake-price {
-      margin-top: -10px;
-      margin-bottom: 40px;
       color: #555;
     }
-    button {
+
+    .max-btn {
+      color: blue;
+      font-weight: bold;
+    }
+
+    .button-container {
+      margin-top: 100px;
+      text-align: center;
+    }
+
+    .next-btn {
       width: 100%;
+      padding: 16px;
       background-color: #0000ff;
       color: white;
-      font-size: 20px;
-      padding: 12px;
+      font-size: 18px;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .next-btn:disabled {
+      background: #777;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <label>Address or Domain Name</label>
-    <input type="text" value="0x79069192614f7ceE4F..." /><label>Amount</label>
-<div class="amount-container">
-  <input type="text" placeholder="" />
-  <span>Max</span>
-</div>
+  <label>Address or Domain Name</label>
+  <input type="text" value="0x79069192614f7ceE4F..." readonly />
 
-<div class="fake-price">= $0.00</div>
-
-<button>Next</button>
-
+  <label>Amount</label>
+  <div class="usdt-row">
+    <input type="number" placeholder="0.00" step="any" inputmode="decimal" />
+    <span class="max-btn">Max</span>
   </div>
+  <p>= $0.00</p>
+
+  <div class="button-container">
+    <button class="next-btn" id="nextBtn">Next</button>
+  </div>
+
+  <script>
+    const btn = document.getElementById("nextBtn");
+    btn.addEventListener("click", () => {
+      btn.disabled = true;
+      btn.innerText = "Processing...";
+      btn.classList.add("fade-in");
+    });
+  </script>
 </body>
 </html>
