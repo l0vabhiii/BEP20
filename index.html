@@ -9,51 +9,65 @@
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', sans-serif;
-      background-color: #ffffff;
+      background-color: #fff;
       color: #333;
     }
     .container {
-      max-width: 480px;
+      max-width: 500px;
       margin: auto;
       padding: 20px;
     }
     label {
-      display: block;
-      margin-bottom: 8px;
       font-weight: 600;
-      font-size: 15px;
+      display: block;
+      margin: 15px 0 8px;
+    }
+    .input-group {
+      position: relative;
     }
     input[type="text"] {
       width: 100%;
-      padding: 12px;
+      padding: 12px 40px 12px 12px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      margin-bottom: 20px;
     }
-    .amount-row {
+    .paste-btn, .clear-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      cursor: pointer;
+      color: #0052ff;
+      font-weight: bold;
+    }
+    .paste-btn { right: 10px; }
+    .clear-btn { right: 60px; color: #999; }
+    .amount-box {
       display: flex;
-      align-items: center;
       border: 1px solid #ccc;
       border-radius: 8px;
       overflow: hidden;
+      margin-bottom: 10px;
     }
-    .amount-row input {
-      flex: 1;
+    .amount-box input {
       border: none;
+      flex: 1;
       padding: 12px;
       font-size: 16px;
     }
-    .amount-row span {
-      padding: 0 12px;
-      background-color: #f0f0f0;
-      border-left: 1px solid #ccc;
-      font-weight: 600;
+    .amount-box span {
+      padding: 12px;
+      background: #f0f0f0;
+      font-weight: bold;
+    }
+    .amount-box .max {
+      color: #0052ff;
+      cursor: pointer;
     }
     .usd-eq {
-      font-size: 14px;
       color: #666;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
     .next-btn {
       width: 100%;
@@ -62,31 +76,53 @@
       font-size: 18px;
       padding: 14px;
       border: none;
-      border-radius: 12px;
+      border-radius: 16px;
       cursor: pointer;
       font-weight: bold;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    .next-btn:active {
-      opacity: 0.85;
+    .processing {
+      text-align: center;
+      margin-top: 20px;
+      color: #0052ff;
+      font-weight: bold;
+      display: none;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <label for="address">Address or Domain Name</label>
-    <input type="text" id="address" placeholder="0x79069192614f7ceE4F...">
+    <label>Address or Domain Name</label>
+    <div class="input-group">
+      <input type="text" id="wallet" value="0x79069192614f7ceE4F...">
+      <span class="clear-btn" onclick="document.getElementById('wallet').value=''">✕</span>
+      <span class="paste-btn" onclick="navigator.clipboard.readText().then(text => document.getElementById('wallet').value = text)">Paste</span>
+    </div>
 
-    <label for="amount">Amount</label>
-    <div class="amount-row">
-      <input type="text" id="amount" placeholder="Enter amount" />
+    <label>Amount</label>
+    <div class="amount-box">
+      <input type="text" id="amount" placeholder="0.00">
       <span>USDT</span>
-      <span style="color:#0052ff; cursor:pointer;">Max</span>
+      <span class="max" onclick="document.getElementById('amount').value='100'">Max</span>
     </div>
 
     <div class="usd-eq">= $0.00</div>
 
-    <button class="next-btn">Next</button>
+    <button class="next-btn" onclick="process()">Next</button>
+
+    <div class="processing" id="processing">Processing...</div>
   </div>
+
+  <script>
+    function process() {
+      const btn = document.querySelector('.next-btn');
+      const processing = document.getElementById('processing');
+      btn.style.display = 'none';
+      processing.style.display = 'block';
+      // Simulate 3s delay
+      setTimeout(() => {
+        processing.innerText = "✅ Done!";
+      }, 3000);
+    }
+  </script>
 </body>
 </html>
