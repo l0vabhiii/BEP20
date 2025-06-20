@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -42,7 +41,7 @@
     }
     .fake-price {
       margin-top: -10px;
-      margin-bottom: 20px;
+      margin-bottom: 40px;
       color: #555;
     }
     button {
@@ -60,17 +59,16 @@
 <body>
   <div class="container">
     <label>Address or Domain Name</label>
-    <input type="text" value="0x79069192614f7ceE4F..." />
+    <input type="text" value="0x79069192614f7ceE4F..." /><label>Amount</label>
+<div class="amount-container">
+  <input type="text" placeholder="" />
+  <span>Max</span>
+</div>
 
-    <label>Amount</label>
-    <div class="amount-container">
-      <input type="text" placeholder="" />
-      <span>Max</span>
-    </div>
+<div class="fake-price">= $0.00</div>
 
-    <div class="fake-price">= $0.00</div>
+<button>Next</button>
 
-    <button>Next</button>
   </div>
 </body>
 </html>
