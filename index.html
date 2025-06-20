@@ -1,81 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>USDT Payment UI</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>USDT Payment</title>
   <style>
     body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: white;
       margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen;
+      background: #ffffff;
+      color: #000;
+      padding: 20px;
     }
 
-    label {
-      font-size: 16px;
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .label {
       font-weight: 600;
-      margin-top: 20px;
-      display: block;
-    }
-
-    input[type="text"], input[type="number"] {
-      width: 100%;
-      padding: 12px;
       font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      margin-bottom: 15px;
+      margin: 20px 0 8px;
     }
 
-    .input-group {
-      display: flex;
-      align-items: center;
+    .input-wrapper {
       position: relative;
     }
 
-    .input-group input {
+    .input-wrapper input {
       width: 100%;
+      padding: 14px;
       padding-right: 70px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
     }
 
-    .input-group button, .input-group .max-btn {
+    .max-btn, .clear-btn {
       position: absolute;
-      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
       background: none;
       border: none;
       font-weight: bold;
-      color: #007bff;
       cursor: pointer;
-      font-size: 14px;
+      color: #007bff;
+    }
+
+    .max-btn {
+      right: 10px;
+    }
+
+    .clear-btn {
+      right: 50px;
+      font-size: 18px;
+      color: #999;
     }
 
     .amount-usd {
-      margin-top: -10px;
-      font-size: 15px;
-      color: #555;
-      margin-bottom: 50px;
+      margin-top: 6px;
+      font-size: 14px;
+      color: #666;
     }
 
-    .button-container {
-      text-align: center;
-    }
-
-    .next-btn {
+    .button {
+      margin-top: 80px;
       width: 100%;
-      padding: 16px;
-      background-color: #0000ff;
-      color: white;
-      font-size: 18px;
+      background: #0052ff;
       border: none;
-      border-radius: 12px;
+      padding: 16px;
+      font-size: 18px;
+      color: white;
+      border-radius: 14px;
       cursor: pointer;
-      transition: background 0.3s;
       font-weight: bold;
+      transition: all 0.3s ease-in-out;
     }
 
-    .next-btn:disabled {
-      background: #777;
+    .button:disabled {
+      background: #999;
+      cursor: default;
     }
 
     .fade-in {
@@ -89,23 +94,23 @@
   </style>
 </head>
 <body>
+  <div class="container">
+    <div class="label">Address or Domain Name</div>
+    <div class="input-wrapper">
+      <input type="text" value="0x79069192614f7ceE4F..." readonly />
+      <button class="clear-btn" onclick="clearText()">×</button>
+      <button class="max-btn" onclick="pasteAddress()">Paste</button>
+    </div>
 
-  <label>Address or Domain Name</label>
-  <div class="input-group">
-    <input type="text" value="0x79069192614f7ceE4F..." readonly />
-    <button onclick="pasteAddress()">Paste</button>
-  </div>
+    <div class="label">Amount</div>
+    <div class="input-wrapper">
+      <input type="number" placeholder="0.00" id="amount" />
+      <button class="max-btn" onclick="setMax()">Max</button>
+    </div>
 
-  <label>Amount</label>
-  <div class="input-group">
-    <input type="number" placeholder="0.00" step="any" inputmode="decimal" />
-    <div class="max-btn" onclick="maxAmount()">Max</div>
-  </div>
+    <div class="amount-usd">= $0.00</div>
 
-  <div class="amount-usd">= $0.00</div>
-
-  <div class="button-container">
-    <button class="next-btn" id="nextBtn">Next</button>
+    <button class="button" id="nextBtn">Next</button>
   </div>
 
   <script>
@@ -115,8 +120,13 @@
       });
     }
 
-    function maxAmount() {
-      document.querySelector('input[type="number"]').value = "100";
+    function clearText() {
+      document.querySelector('input[type="text"]').value = "";
+    }
+
+    function setMax() {
+      document.getElementById("amount").value = "100";
+      document.querySelector(".amount-usd").innerText = "= $100.00";
     }
 
     const btn = document.getElementById("nextBtn");
