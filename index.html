@@ -2,26 +2,75 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Send USDT</title>
-  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 400px;
+      margin: auto;
+    }
+    label {
+      font-size: 16px;
+      margin-bottom: 5px;
+      display: block;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .amount-container {
+      position: relative;
+    }
+    .amount-container span {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #0066ff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .fake-price {
+      margin-top: -10px;
+      margin-bottom: 20px;
+      color: #555;
+    }
+    button {
+      width: 100%;
+      background-color: #0000ff;
+      color: white;
+      font-size: 20px;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h2>Address or Domain Name</h2>
-    <input type="text" placeholder="0x79069192614f7ceE4F..." value="0x79069192614f7ceE4F..." />
+    <label>Address or Domain Name</label>
+    <input type="text" value="0x79069192614f7ceE4F..." />
 
-    <h2>Amount</h2>
-    <div class="amount-section">
-      <input type="text" placeholder="Enter amount" />
-      <span class="unit">USDT</span>
-      <span class="max">Max</span>
+    <label>Amount</label>
+    <div class="amount-container">
+      <input type="text" placeholder="" />
+      <span>Max</span>
     </div>
 
-    <p class="dollar-value">= $0.00</p>
+    <div class="fake-price">= $0.00</div>
 
-    <button class="next-btn">Next</button>
-    <p class="footer-msg">Press back button to exit fullscreen mode</p>
+    <button>Next</button>
   </div>
 </body>
 </html>
