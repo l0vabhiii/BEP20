@@ -6,121 +6,114 @@
   <title>Send USDT</title>
   <style>
     body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f9f9f9;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #fff;
       color: #000;
+      font-size: 14px;
     }
     .container {
-      max-width: 480px;
+      max-width: 500px;
       margin: auto;
-      padding: 20px;
+      padding: 16px;
+      background: #fff;
     }
     label {
       display: block;
-      margin-top: 20px;
-      margin-bottom: 8px;
-      font-weight: 600;
-      font-size: 15px;
+      margin-bottom: 6px;
+      font-weight: 500;
+      font-size: 13px;
     }
-    .input-wrap {
+    .field-block {
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      margin-bottom: 20px;
       position: relative;
     }
-    .input-wrap input {
+    .field-block input {
       width: 100%;
-      padding: 12px 90px 12px 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 12px;
+      border: none;
+      font-size: 14px;
+      outline: none;
     }
-    .input-actions {
+    .field-icons {
       position: absolute;
-      right: 10px;
       top: 50%;
+      right: 14px;
       transform: translateY(-50%);
       display: flex;
-      gap: 10px;
+      gap: 12px;
     }
-    .input-actions span {
-      font-size: 14px;
-      font-weight: bold;
+    .field-icons span {
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
     }
-    .clear {
-      color: #999;
-    }
-    .paste {
-      color: #0052ff;
-    }
+    .clear { color: #888; }
+    .paste { color: #0052ff; }
+
     .amount-box {
       display: flex;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      overflow: hidden;
-      margin-top: 5px;
+      justify-content: space-between;
+      align-items: center;
     }
     .amount-box input {
       flex: 1;
-      border: none;
-      padding: 12px;
-      font-size: 16px;
-      outline: none;
     }
     .amount-box span {
-      padding: 12px;
-      font-size: 14px;
-      font-weight: bold;
-      background-color: #f0f0f0;
+      padding: 0 8px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #f1f1f1;
+      border-radius: 8px;
+      margin-left: 8px;
     }
-    .max {
-      color: #0052ff;
-      background: none;
-      cursor: pointer;
-    }
-    .usd-text {
-      font-size: 14px;
+    .usd-note {
       color: #777;
-      margin: 12px 0 30px;
+      font-size: 12px;
+      margin-bottom: 24px;
     }
-    .next-btn {
+    button {
       width: 100%;
       background-color: #0052ff;
       color: white;
-      font-size: 18px;
       padding: 14px;
+      font-size: 16px;
+      font-weight: bold;
       border: none;
       border-radius: 16px;
       cursor: pointer;
-      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <label>Address or Domain Name</label>
-    <div class="input-wrap">
+    <div class="field-block">
       <input type="text" id="wallet" placeholder="0x79069192614f7ceE4F..." />
-      <div class="input-actions">
+      <div class="field-icons">
         <span class="clear" onclick="document.getElementById('wallet').value=''">✕</span>
         <span class="paste" onclick="navigator.clipboard.readText().then(text => document.getElementById('wallet').value = text)">Paste</span>
       </div>
     </div>
 
     <label>Amount</label>
-    <div class="amount-box">
+    <div class="field-block amount-box">
       <input type="text" id="amount" placeholder="0.00" />
       <span>USDT</span>
-      <span class="max" onclick="document.getElementById('amount').value='100'">Max</span>
+      <span class="paste" onclick="document.getElementById('amount').value='100'">Max</span>
     </div>
 
-    <div class="usd-text">= $0.00</div>
+    <div class="usd-note">= $0.00</div>
 
-    <button class="next-btn" id="nextBtn" onclick="process()">Next</button>
+    <button id="nextBtn" onclick="nextProcess()">Next</button>
   </div>
 
   <script>
-    function process() {
+    function nextProcess() {
       const btn = document.getElementById('nextBtn');
       btn.innerText = "Processing...";
       btn.disabled = true;
