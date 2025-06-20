@@ -1,0 +1,30 @@
+body {
+  background: #081c3a;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 40px 20px;
+}
+.logo {
+  width: 100px;
+  margin: 20px auto;
+  display: block;
+}
+h1 {
+  font-size: 1.5rem;
+}
+button {
+  padding: 12px 24px;
+  background: #0052ff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  font-size: 1rem;
+  margin-top: 20px;
+}
+.footer {
+  opacity: 0.5;
+  font-size: 0.8rem;
+  margin-top: 40px;
+}
