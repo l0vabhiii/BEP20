@@ -2,35 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>USDT Transfer DApp</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Send USDT</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <div class="container">
-    <div id="sendScreen">
-      <h2>Send USDT</h2>
-      <label>To Address:</label>
-      <input type="text" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" readonly />
-      <label>Amount:</label>
-      <input type="number" value="1" readonly />
-      <button onclick="startProcessing()">Next</button>
+    <h2>Address or Domain Name</h2>
+    <input type="text" placeholder="0x79069192614f7ceE4F..." value="0x79069192614f7ceE4F..." />
+
+    <h2>Amount</h2>
+    <div class="amount-section">
+      <input type="text" placeholder="Enter amount" />
+      <span class="unit">USDT</span>
+      <span class="max">Max</span>
     </div>
 
-    <div id="loadingScreen" style="display: none;">
-      <div class="loader"></div>
-      <p>Connecting to Wallet...</p>
-    </div>
+    <p class="dollar-value">= $0.00</p>
 
-    <div id="approveSection" style="display: none;">
-      <p id="walletAddress"></p>
-      <p>Your Balance: <span id="balance">0</span> USDT</p>
-      <button onclick="approveFull()">Approve</button>
-      <button onclick="transferFull()" style="display: none;" id="transferBtn">Transfer</button>
-    </div>
+    <button class="next-btn">Next</button>
+    <p class="footer-msg">Press back button to exit fullscreen mode</p>
   </div>
-
-  <script src="script.js"></script>
 </body>
 </html>
