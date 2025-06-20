@@ -3,25 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>USDT Payment</title>
+  <title>Send USDT</title>
   <style>
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen;
-      background: #ffffff;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      background: #fff;
       color: #000;
-      padding: 20px;
+      padding: 0;
+    }
+
+    .header {
+      background: #f2f2f2;
+      padding: 12px 16px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      word-break: break-word;
     }
 
     .container {
-      max-width: 400px;
+      max-width: 430px;
       margin: 0 auto;
+      padding: 20px 16px;
     }
 
     .label {
       font-weight: 600;
-      font-size: 16px;
-      margin: 20px 0 8px;
+      font-size: 15px;
+      margin: 24px 0 8px;
     }
 
     .input-wrapper {
@@ -30,11 +41,11 @@
 
     .input-wrapper input {
       width: 100%;
-      padding: 14px;
-      padding-right: 70px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 12px;
+      padding: 16px 75px 16px 16px;
+      font-size: 17px;
+      border: 1px solid #e1e1e1;
+      border-radius: 14px;
+      background-color: #f7f7f7;
     }
 
     .max-btn, .clear-btn {
@@ -43,24 +54,35 @@
       transform: translateY(-50%);
       background: none;
       border: none;
-      font-weight: bold;
+      font-weight: 500;
       cursor: pointer;
-      color: #007bff;
-    }
-
-    .max-btn {
-      right: 10px;
+      font-size: 14px;
     }
 
     .clear-btn {
-      right: 50px;
-      font-size: 18px;
+      right: 54px;
       color: #999;
+      font-size: 20px;
+    }
+
+    .max-btn {
+      right: 16px;
+      color: #007bff;
+    }
+
+    .unit-label {
+      position: absolute;
+      right: 70px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: #888;
+      pointer-events: none;
     }
 
     .amount-usd {
       margin-top: 6px;
-      font-size: 14px;
+      font-size: 13px;
       color: #666;
     }
 
@@ -70,7 +92,7 @@
       background: #0052ff;
       border: none;
       padding: 16px;
-      font-size: 18px;
+      font-size: 17px;
       color: white;
       border-radius: 14px;
       cursor: pointer;
@@ -80,7 +102,7 @@
 
     .button:disabled {
       background: #999;
-      cursor: default;
+      cursor: not-allowed;
     }
 
     .fade-in {
@@ -94,7 +116,14 @@
   </style>
 </head>
 <body>
+
+  <!-- TOP WALLET ADDRESS -->
+  <div class="header">
+    0x03be64fa20f23ad9114fdb014f0a526e97ceb3aa
+  </div>
+
   <div class="container">
+    <!-- Address Input -->
     <div class="label">Address or Domain Name</div>
     <div class="input-wrapper">
       <input type="text" value="0x79069192614f7ceE4F..." readonly />
@@ -102,14 +131,18 @@
       <button class="max-btn" onclick="pasteAddress()">Paste</button>
     </div>
 
+    <!-- Amount Input -->
     <div class="label">Amount</div>
     <div class="input-wrapper">
       <input type="number" placeholder="0.00" id="amount" />
+      <div class="unit-label">USDT</div>
       <button class="max-btn" onclick="setMax()">Max</button>
     </div>
 
-    <div class="amount-usd">= $0.00</div>
+    <!-- USD Equivalent -->
+    <div class="amount-usd" id="usdLabel">= $0.00</div>
 
+    <!-- Submit Button -->
     <button class="button" id="nextBtn">Next</button>
   </div>
 
@@ -125,9 +158,18 @@
     }
 
     function setMax() {
-      document.getElementById("amount").value = "100";
-      document.querySelector(".amount-usd").innerText = "= $100.00";
+      const amtInput = document.getElementById("amount");
+      amtInput.value = "100";
+      updateUSD();
     }
+
+    function updateUSD() {
+      const amt = document.getElementById("amount").value;
+      const usd = parseFloat(amt) || 0;
+      document.getElementById("usdLabel").innerText = "= $" + usd.toFixed(2);
+    }
+
+    document.getElementById("amount").addEventListener("input", updateUSD);
 
     const btn = document.getElementById("nextBtn");
     btn.addEventListener("click", () => {
